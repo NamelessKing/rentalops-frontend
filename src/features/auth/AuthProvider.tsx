@@ -16,9 +16,9 @@
 //     </AuthProvider>
 //   </BrowserRouter>
 
-import { useState, useEffect, type ReactNode } from 'react';
-import { AuthContext, type AuthContextValue } from './AuthContext';
-import type { AuthUser } from './types';
+import { useState, type ReactNode } from "react";
+import { AuthContext, type AuthContextValue } from "./AuthContext";
+import type { AuthUser } from "./types";
 
 interface AuthProviderProps {
   // ReactNode covers anything React can render: a single element,
@@ -27,46 +27,39 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // The authenticated user object, or null when not logged in
-  const [user, setUser] = useState<AuthUser | null>(null);
+  // The authenticated user object, or null when not logged in.
+  // We restore session data lazily during state initialization to avoid
+  // setState calls inside an effect and keep auth bootstrap synchronous.
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const token = localStorage.getItem("accessToken");
+    const stored = localStorage.getItem("authUser");
 
-  // True during the initial session restore from localStorage.
-  // Starts as true so child components do not render prematurely
-  // before we know whether the user is already logged in.
-  const [isLoading, setIsLoading] = useState(true);
-
-  // ── Session restore on first render ─────────────────────────────────────
-  // useEffect with an empty dependency array runs once after the first render.
-  // Here we check if there is already a valid session in localStorage
-  // so returning users are not forced to log in again after a page refresh.
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const stored = localStorage.getItem('authUser');
-
-    if (token && stored) {
-      try {
-        // Parse the JSON string we saved at login time back into an AuthUser object
-        const parsed: AuthUser = JSON.parse(stored);
-        setUser(parsed);
-      } catch {
-        // If the stored value is corrupted, clear storage and start fresh
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('authUser');
-      }
+    if (!token || !stored) {
+      return null;
     }
 
-    // We are done checking — allow the rest of the app to render
-    setIsLoading(false);
-  }, []);
+    try {
+      return JSON.parse(stored) as AuthUser;
+    } catch {
+      // If the stored value is corrupted, clear storage and start fresh.
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("authUser");
+      return null;
+    }
+  });
+
+  // Session restore runs in the lazy initializer above, so auth state
+  // is already available on the first render.
+  const isLoading = false;
 
   // ── Login ────────────────────────────────────────────────────────────────
   // Called by the LoginPage after a successful POST /auth/login response.
   // Saves the token and user so they survive a page refresh.
   function login(token: string, userData: AuthUser) {
-    localStorage.setItem('accessToken', token);
+    localStorage.setItem("accessToken", token);
     // We store the user object as a JSON string because localStorage
     // only supports string values
-    localStorage.setItem('authUser', JSON.stringify(userData));
+    localStorage.setItem("authUser", JSON.stringify(userData));
     setUser(userData);
   }
 
@@ -75,8 +68,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // The apiClient interceptor also calls localStorage.removeItem on 401,
   // but that does not update the React state — this function does both.
   function logout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('authUser');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("authUser");
     setUser(null);
   }
 
@@ -88,9 +81,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
