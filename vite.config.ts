@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { loadEnv } from "vite";
@@ -27,6 +27,12 @@ export default defineConfig(({ mode }) => {
         // This keeps imports stable regardless of file nesting depth.
         "@": path.resolve(__dirname, "./src"),
       },
+    },
+    test: {
+      globals: true,
+      environment: "jsdom",
+      setupFiles: "./src/tests/setup.ts",
+      css: true,
     },
   };
 });

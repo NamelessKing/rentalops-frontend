@@ -18,3 +18,41 @@ export interface AuthUser {
   role: Role;
   tenantId: string;
 }
+
+// Request body for POST /auth/login.
+// Field names must match docs/08-api-draft.md exactly.
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+// Response body for POST /auth/login.
+// Keep nested shape unchanged: { accessToken, user: { ... } }.
+export interface LoginResponse {
+  accessToken: string;
+  user: AuthUser;
+}
+
+// Request body for POST /auth/register-admin.
+// Keep exact field names from docs/08-api-draft.md.
+export interface RegisterAdminRequest {
+  fullName: string;
+  email: string;
+  password: string;
+  workspaceName: string;
+}
+
+// Response body for POST /auth/register-admin.
+// Register response has no accessToken; login is required after register.
+export interface RegisterAdminResponse {
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    role: "ADMIN";
+  };
+  tenant: {
+    id: string;
+    name: string;
+  };
+}

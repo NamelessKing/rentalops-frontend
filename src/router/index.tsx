@@ -41,6 +41,8 @@ import { OperatorLayout } from "@/layouts/OperatorLayout";
 import { RequireAuth } from "./RequireAuth";
 import { RequireRole } from "./RequireRole";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
+import { LoginPage } from "@/pages/LoginPage";
+import { RegisterPage } from "@/pages/RegisterPage";
 
 export function AppRouter() {
   return (
@@ -53,11 +55,8 @@ export function AppRouter() {
       {/* ── Public area ────────────────────────────────────────────────────── */}
       {/* PublicLayout provides the centred, navbar-free shell */}
       <Route element={<PublicLayout />}>
-        <Route
-          path="/register"
-          element={<PlaceholderPage title="Register" />}
-        />
-        <Route path="/login" element={<PlaceholderPage title="Login" />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Route>
 
       {/* ── Admin area ─────────────────────────────────────────────────────── */}

@@ -10,9 +10,20 @@
 
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/features/auth/useAuth";
+import { useEffect, useRef, useState } from "react";
 
 export function OperatorLayout() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
+  const closeMenu = () => setIsMenuOpen(false);
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    toggleButtonRef.current?.setAttribute(
+      "aria-expanded",
+      isMenuOpen ? "true" : "false",
+    );
+  }, [isMenuOpen]);
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -22,10 +33,10 @@ export function OperatorLayout() {
 
         {/* Mobile toggle — important because operators often use phones */}
         <button
+          ref={toggleButtonRef}
           className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#operatorNav"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
           aria-controls="operatorNav"
           aria-expanded="false"
           aria-label="Toggle navigation"
@@ -33,20 +44,35 @@ export function OperatorLayout() {
           <span className="navbar-toggler-icon" />
         </button>
 
-        <div className="collapse navbar-collapse" id="operatorNav">
+        <div
+          className={`navbar-collapse collapse ${isMenuOpen ? "show" : ""}`}
+          id="operatorNav"
+        >
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
-              <NavLink className="nav-link" to="/operator/tasks">
+              <NavLink
+                className="nav-link"
+                to="/operator/tasks"
+                onClick={closeMenu}
+              >
                 My Tasks
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/operator/pool">
+              <NavLink
+                className="nav-link"
+                to="/operator/pool"
+                onClick={closeMenu}
+              >
                 Pool
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/operator/issue-reports/new">
+              <NavLink
+                className="nav-link"
+                to="/operator/issue-reports/new"
+                onClick={closeMenu}
+              >
                 Report Issue
               </NavLink>
             </li>
@@ -54,7 +80,13 @@ export function OperatorLayout() {
 
           <div className="d-flex align-items-center gap-3">
             <span className="text-light small">{user?.fullName}</span>
-            <button className="btn btn-outline-light btn-sm" onClick={logout}>
+            <button
+              className="btn btn-outline-light btn-sm"
+              onClick={() => {
+                closeMenu();
+                logout();
+              }}
+            >
               Logout
             </button>
           </div>

@@ -12,9 +12,20 @@
 
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/features/auth/useAuth";
+import { useEffect, useRef, useState } from "react";
 
 export function AdminLayout() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
+  const closeMenu = () => setIsMenuOpen(false);
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    toggleButtonRef.current?.setAttribute(
+      "aria-expanded",
+      isMenuOpen ? "true" : "false",
+    );
+  }, [isMenuOpen]);
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -25,10 +36,10 @@ export function AdminLayout() {
 
         {/* Mobile toggle button — collapses links on small screens */}
         <button
+          ref={toggleButtonRef}
           className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#adminNav"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
           aria-controls="adminNav"
           aria-expanded="false"
           aria-label="Toggle navigation"
@@ -36,33 +47,56 @@ export function AdminLayout() {
           <span className="navbar-toggler-icon" />
         </button>
 
-        <div className="collapse navbar-collapse" id="adminNav">
+        <div
+          className={`navbar-collapse collapse ${isMenuOpen ? "show" : ""}`}
+          id="adminNav"
+        >
           {/* Primary navigation links */}
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
               {/* NavLink adds the Bootstrap `active` class automatically
                   when the current URL matches the `to` path */}
-              <NavLink className="nav-link" to="/admin/dashboard">
+              <NavLink
+                className="nav-link"
+                to="/admin/dashboard"
+                onClick={closeMenu}
+              >
                 Dashboard
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin/operators">
+              <NavLink
+                className="nav-link"
+                to="/admin/operators"
+                onClick={closeMenu}
+              >
                 Operators
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin/properties">
+              <NavLink
+                className="nav-link"
+                to="/admin/properties"
+                onClick={closeMenu}
+              >
                 Properties
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin/tasks">
+              <NavLink
+                className="nav-link"
+                to="/admin/tasks"
+                onClick={closeMenu}
+              >
                 Tasks
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin/issue-reports">
+              <NavLink
+                className="nav-link"
+                to="/admin/issue-reports"
+                onClick={closeMenu}
+              >
                 Issue Reports
               </NavLink>
             </li>
@@ -71,7 +105,13 @@ export function AdminLayout() {
           {/* Right-side: show current user name and logout button */}
           <div className="d-flex align-items-center gap-3">
             <span className="text-light small">{user?.fullName}</span>
-            <button className="btn btn-outline-light btn-sm" onClick={logout}>
+            <button
+              className="btn btn-outline-light btn-sm"
+              onClick={() => {
+                closeMenu();
+                logout();
+              }}
+            >
               Logout
             </button>
           </div>
