@@ -13,6 +13,7 @@
 //         /admin/dashboard
 //         /admin/operators
 //         /admin/operators/new
+//         /admin/operators/:operatorId/edit
 //         /admin/properties
 //         /admin/properties/new
 //         /admin/properties/:propertyId
@@ -43,6 +44,12 @@ import { RequireRole } from "./RequireRole";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { OperatorListPage } from "@/pages/OperatorListPage";
+import { CreateOperatorPage } from "@/pages/CreateOperatorPage";
+import { EditOperatorPage } from "@/pages/EditOperatorPage";
+import { PropertyListPage } from "@/pages/PropertyListPage";
+import { CreatePropertyPage } from "@/pages/CreatePropertyPage";
+import { PropertyDetailPage } from "@/pages/PropertyDetailPage";
 
 export function AppRouter() {
   return (
@@ -69,25 +76,23 @@ export function AppRouter() {
               path="/admin/dashboard"
               element={<PlaceholderPage title="Admin Dashboard" />}
             />
-            <Route
-              path="/admin/operators"
-              element={<PlaceholderPage title="Operators" />}
-            />
+            <Route path="/admin/operators" element={<OperatorListPage />} />
             <Route
               path="/admin/operators/new"
-              element={<PlaceholderPage title="New Operator" />}
+              element={<CreateOperatorPage />}
             />
             <Route
-              path="/admin/properties"
-              element={<PlaceholderPage title="Properties" />}
+              path="/admin/operators/:operatorId/edit"
+              element={<EditOperatorPage />}
             />
+            <Route path="/admin/properties" element={<PropertyListPage />} />
             <Route
               path="/admin/properties/new"
-              element={<PlaceholderPage title="New Property" />}
+              element={<CreatePropertyPage />}
             />
             <Route
               path="/admin/properties/:propertyId"
-              element={<PlaceholderPage title="Property Detail" />}
+              element={<PropertyDetailPage />}
             />
             <Route
               path="/admin/tasks"

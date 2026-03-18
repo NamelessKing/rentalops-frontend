@@ -102,9 +102,26 @@ export function AdminLayout() {
             </li>
           </ul>
 
-          {/* Right-side: show current user name and logout button */}
+          {/* Right-side: user identifier + logout.
+               On xs (mobile) we show only the two-letter initials to prevent
+               long names from overflowing the navbar on small screens. */}
           <div className="d-flex align-items-center gap-3">
-            <span className="text-light small">{user?.fullName}</span>
+            {/* Full name on sm and above */}
+            <span className="d-none d-sm-inline text-light small">
+              {user?.fullName}
+            </span>
+            {/* Initials only on xs */}
+            <span
+              className="d-inline d-sm-none text-light small fw-semibold"
+              aria-label={user?.fullName ?? "User"}
+            >
+              {user?.fullName
+                ?.split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2)}
+            </span>
             <button
               className="btn btn-outline-light btn-sm"
               onClick={() => {
