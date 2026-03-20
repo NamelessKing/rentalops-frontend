@@ -50,6 +50,12 @@ import { EditOperatorPage } from "@/pages/EditOperatorPage";
 import { PropertyListPage } from "@/pages/PropertyListPage";
 import { CreatePropertyPage } from "@/pages/CreatePropertyPage";
 import { PropertyDetailPage } from "@/pages/PropertyDetailPage";
+import { TaskListAdminPage } from "@/pages/TaskListAdminPage";
+import { CreateTaskPage } from "@/pages/CreateTaskPage";
+import { AdminTaskDetailPage } from "@/pages/AdminTaskDetailPage";
+import { OperatorMyTasksPage } from "@/pages/OperatorMyTasksPage";
+import { OperatorTaskDetailPage } from "@/pages/OperatorTaskDetailPage";
+import { OperatorPoolPage } from "@/pages/OperatorPoolPage";
 
 export function AppRouter() {
   return (
@@ -94,17 +100,11 @@ export function AppRouter() {
               path="/admin/properties/:propertyId"
               element={<PropertyDetailPage />}
             />
-            <Route
-              path="/admin/tasks"
-              element={<PlaceholderPage title="Tasks" />}
-            />
-            <Route
-              path="/admin/tasks/new"
-              element={<PlaceholderPage title="New Task" />}
-            />
+            <Route path="/admin/tasks" element={<TaskListAdminPage />} />
+            <Route path="/admin/tasks/new" element={<CreateTaskPage />} />
             <Route
               path="/admin/tasks/:taskId"
-              element={<PlaceholderPage title="Task Detail" />}
+              element={<AdminTaskDetailPage />}
             />
             <Route
               path="/admin/issue-reports"
@@ -122,18 +122,12 @@ export function AppRouter() {
       <Route element={<RequireAuth />}>
         <Route element={<RequireRole role="OPERATOR" />}>
           <Route element={<OperatorLayout />}>
-            <Route
-              path="/operator/tasks"
-              element={<PlaceholderPage title="My Tasks" />}
-            />
+            <Route path="/operator/tasks" element={<OperatorMyTasksPage />} />
             <Route
               path="/operator/tasks/:taskId"
-              element={<PlaceholderPage title="Task Detail" />}
+              element={<OperatorTaskDetailPage />}
             />
-            <Route
-              path="/operator/pool"
-              element={<PlaceholderPage title="Task Pool" />}
-            />
+            <Route path="/operator/pool" element={<OperatorPoolPage />} />
             <Route
               path="/operator/issue-reports/new"
               element={<PlaceholderPage title="Create Issue Report" />}
