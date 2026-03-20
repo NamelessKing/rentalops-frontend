@@ -384,7 +384,10 @@ export function CreateTaskPage() {
               </div>
             )}
 
-            <div className="d-flex gap-2 mt-4">
+            {/* d-grid stacks Create Task and Cancel full-width on mobile.
+                On desktop both buttons are full-width inside the card, which is
+                acceptable because the card constrains max-width via the layout. */}
+            <div className="d-grid gap-2 mt-4">
               <button
                 type="submit"
                 className="btn btn-primary"

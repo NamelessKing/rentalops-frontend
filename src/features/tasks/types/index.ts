@@ -98,3 +98,12 @@ export interface CreateTaskRequest {
   assigneeId?: string; // Omit entirely for POOL. Required for DIRECT_ASSIGNMENT.
   estimatedHours?: number;
 }
+
+// Response from POST /tasks/{id}/claim (HTTP 200).
+// The task is now ASSIGNED to the authenticated operator.
+// Use the returned id to redirect to /operator/tasks/:id without a second GET.
+export interface ClaimTaskResponse {
+  id: string;
+  status: "ASSIGNED";
+  assigneeId: string;
+}

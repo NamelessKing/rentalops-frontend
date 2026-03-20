@@ -387,7 +387,7 @@ export function PropertyDetailPage() {
             {isEditing && (
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-primary w-100"
                 disabled={saving}
               >
                 {saving ? "Saving..." : "Save"}

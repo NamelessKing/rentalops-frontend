@@ -218,7 +218,7 @@ export function CreatePropertyPage() {
 
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn btn-primary w-100"
               disabled={submitting}
             >
               {submitting ? "Creating..." : "Create Property"}

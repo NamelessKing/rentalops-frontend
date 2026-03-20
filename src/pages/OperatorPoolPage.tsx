@@ -5,12 +5,59 @@
 // An empty list means either no tasks match the category or the operator has no
 // category configured. Both cases show the same empty state message.
 //
-// The "Claim" button is not yet active — rendered disabled with a tooltip.
+// Claim flow:
+//   - POST /tasks/{id}/claim → 200: redirect to /operator/tasks/:id (task detail).
+//   - 409: another operator claimed first — show a dismissible warning and refresh the pool.
 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useTaskPool } from "@/features/tasks/hooks/useTaskPool";
+import { claimTask } from "@/features/tasks/api/tasksApi";
 
 export function OperatorPoolPage() {
   const { data, loading, error, reload } = useTaskPool();
+  const navigate = useNavigate();
+
+  // claimingId: the id of the task currently being claimed, for per-card spinner.
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+  // claimError: shown as a dismissible alert above the list on claim failures.
+  const [claimError, setClaimError] = useState<string | null>(null);
+
+  async function handleClaim(taskId: string) {
+    setClaimingId(taskId);
+    setClaimError(null);
+
+    try {
+      const result = await claimTask(taskId);
+      // Redirect directly to the task detail so the operator can immediately Start.
+      navigate(`/operator/tasks/${result.id}`);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+
+        if (status === 409) {
+          // Concurrent claim: another operator was faster. Refresh the pool so
+          // the taken task disappears from the list, and show a clear message.
+          setClaimError(
+            "This task was just claimed by another operator. The list has been refreshed.",
+          );
+          void reload();
+        } else if (status === 404) {
+          setClaimError(
+            "Task no longer available. The list has been refreshed.",
+          );
+          void reload();
+        } else {
+          setClaimError("Unable to claim this task. Please try again.");
+        }
+      } else {
+        setClaimError("Unable to claim this task. Please try again.");
+      }
+
+      setClaimingId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -49,6 +96,22 @@ export function OperatorPoolPage() {
     <section>
       <h1 className="h4 mb-3">Task Pool</h1>
 
+      {/* Claim error — dismissible warning when a claim attempt fails or hits a 409. */}
+      {claimError && (
+        <div
+          className="alert alert-warning alert-dismissible d-flex align-items-start gap-2 mb-3"
+          role="alert"
+        >
+          <span>{claimError}</span>
+          <button
+            type="button"
+            className="btn-close ms-auto"
+            aria-label="Close"
+            onClick={() => setClaimError(null)}
+          />
+        </div>
+      )}
+
       {tasks.length === 0 ? (
         <div className="card shadow-sm">
           <div className="card-body py-4 text-center text-muted">
@@ -69,14 +132,14 @@ export function OperatorPoolPage() {
                   </p>
                 </div>
                 <div className="card-footer bg-transparent">
-                  {/* Claim button — not yet active, will be wired in a future update. */}
                   <button
                     type="button"
-                    className="btn btn-sm btn-primary w-100"
-                    disabled
-                    title="Coming soon — available in next update"
+                    className="btn btn-primary w-100"
+                    // Disable the card being claimed; allow all other cards.
+                    disabled={claimingId === task.id}
+                    onClick={() => void handleClaim(task.id)}
                   >
-                    Claim
+                    {claimingId === task.id ? "Claiming…" : "Claim"}
                   </button>
                 </div>
               </div>

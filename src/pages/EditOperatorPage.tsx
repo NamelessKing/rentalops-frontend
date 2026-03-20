@@ -211,8 +211,9 @@ export function EditOperatorPage() {
               </select>
             </div>
 
-            {/* Primary CTA: save form + secondary CTA: toggle status */}
-            <div className="d-flex flex-wrap gap-2">
+            {/* Primary CTA: save form + secondary CTA: toggle status.
+                d-grid stacks the buttons full-width on every screen — important on mobile. */}
+            <div className="d-grid gap-2">
               <button
                 type="submit"
                 className="btn btn-primary"

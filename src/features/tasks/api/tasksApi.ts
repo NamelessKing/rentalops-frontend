@@ -7,6 +7,7 @@
 
 import apiClient from "@/shared/api/apiClient";
 import type {
+  ClaimTaskResponse,
   CreateTaskRequest,
   MyTaskItem,
   TaskDetailResponse,
@@ -48,4 +49,24 @@ export async function fetchTaskPool(): Promise<TaskPoolItem[]> {
 export async function fetchMyTasks(): Promise<MyTaskItem[]> {
   const res = await apiClient.get<MyTaskItem[]>("/tasks/my");
   return res.data;
+}
+
+// POST /tasks/{id}/claim — Operator: claim a PENDING pool task.
+// No request body — the operator identity comes from the JWT.
+// Returns 200 with the new assignment if successful; 409 if already claimed.
+export async function claimTask(id: string): Promise<ClaimTaskResponse> {
+  const res = await apiClient.post<ClaimTaskResponse>(`/tasks/${id}/claim`);
+  return res.data;
+}
+
+// PATCH /tasks/{id}/start — Operator (assignee only): ASSIGNED → IN_PROGRESS.
+// Returns 204 No Content on success — update status locally from the response code.
+export async function startTask(id: string): Promise<void> {
+  await apiClient.patch(`/tasks/${id}/start`);
+}
+
+// PATCH /tasks/{id}/complete — Operator (assignee only): IN_PROGRESS → COMPLETED.
+// Returns 204 No Content on success.
+export async function completeTask(id: string): Promise<void> {
+  await apiClient.patch(`/tasks/${id}/complete`);
 }

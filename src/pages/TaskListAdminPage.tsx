@@ -86,50 +86,100 @@ export function TaskListAdminPage() {
           </div>
         </div>
       ) : (
-        <div className="card shadow-sm">
-          <div className="table-responsive">
-            <table className="table table-hover mb-0">
-              <thead className="table-light">
-                <tr>
-                  <th>Property</th>
-                  <th>Category</th>
-                  <th>Priority</th>
-                  <th>Summary</th>
-                  <th>Status</th>
-                  <th>Mode</th>
-                  <th>Assignee</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => (
-                  <tr
-                    key={task.id}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate(`/admin/tasks/${task.id}`)}
-                  >
-                    <td>{task.propertyName ?? "—"}</td>
-                    <td>{task.category}</td>
-                    <td>
-                      <span
-                        className={`badge ${PRIORITY_BADGE[task.priority] ?? "bg-secondary"}`}
-                      >
-                        {task.priority}
-                      </span>
-                    </td>
-                    <td>{task.summary}</td>
-                    <td>
-                      <TaskStatusBadge status={task.status} />
-                    </td>
-                    <td>
+        <>
+          {/* ── Mobile card list — visible on xs/sm (below md breakpoint) ──
+               7 columns would be unreadable on a phone. Cards expose the same
+               data in a tappable, scrollable stack. */}
+          <div className="d-block d-md-none">
+            {tasks.map((task) => (
+              <div
+                key={task.id}
+                className="card mb-3 shadow-sm"
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/admin/tasks/${task.id}`)}
+                role="button"
+                aria-label={`Open task: ${task.summary}`}
+              >
+                <div className="card-body">
+                  {/* Row 1: summary + status badge */}
+                  <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
+                    <h6 className="card-title mb-0">{task.summary}</h6>
+                    <TaskStatusBadge status={task.status} />
+                  </div>
+                  {/* Row 2: property · category */}
+                  <p className="text-muted small mb-2">
+                    {task.propertyName ?? "—"} &middot; {task.category}
+                  </p>
+                  {/* Row 3: priority badge + dispatch mode badge + optional assignee */}
+                  <div className="d-flex flex-wrap align-items-center gap-2">
+                    <span
+                      className={`badge ${PRIORITY_BADGE[task.priority] ?? "bg-secondary"}`}
+                    >
+                      {task.priority}
+                    </span>
+                    <span className="badge text-bg-light border">
                       {DISPATCH_LABELS[task.dispatchMode] ?? task.dispatchMode}
-                    </td>
-                    <td>{task.assigneeName ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </span>
+                    {task.assigneeName && (
+                      <span className="small text-muted">
+                        {task.assigneeName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+
+          {/* ── Desktop table — visible on md and above ── */}
+          <div className="d-none d-md-block">
+            <div className="card shadow-sm">
+              <div className="table-responsive">
+                <table className="table table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Property</th>
+                      <th>Category</th>
+                      <th>Priority</th>
+                      <th>Summary</th>
+                      <th>Status</th>
+                      <th>Mode</th>
+                      <th>Assignee</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tasks.map((task) => (
+                      <tr
+                        key={task.id}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => navigate(`/admin/tasks/${task.id}`)}
+                      >
+                        <td>{task.propertyName ?? "—"}</td>
+                        <td>{task.category}</td>
+                        <td>
+                          <span
+                            className={`badge ${PRIORITY_BADGE[task.priority] ?? "bg-secondary"}`}
+                          >
+                            {task.priority}
+                          </span>
+                        </td>
+                        <td>{task.summary}</td>
+                        <td>
+                          <TaskStatusBadge status={task.status} />
+                        </td>
+                        <td>
+                          {DISPATCH_LABELS[task.dispatchMode] ??
+                            task.dispatchMode}
+                        </td>
+                        <td>{task.assigneeName ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </section>
   );
