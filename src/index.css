@@ -1,58 +1,79 @@
+/*
+ * index.css — RentalOps Design Tokens
+ *
+ * This file defines ALL visual design tokens for the application.
+ * Every color, spacing value, shadow, and radius used in the UI
+ * comes from these variables, so changing a token here updates
+ * the whole app consistently.
+ *
+ * These tokens are then mapped to Bootstrap's own CSS variables
+ * in src/styles/theme.css, which makes Bootstrap components
+ * automatically use our brand colors and style.
+ */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* ── Color palette ── */
+  /* Warm off-white page background — not stark white, feels approachable */
+  --ro-bg: #f4efe6;
+  /* Surface: cards, panels, inputs — slightly warmer than pure white */
+  --ro-surface: #fffdf9;
+  /* Primary brand color: deep forest green — authoritative, trustworthy */
+  --ro-primary: #295846;
+  /* Darker shade of primary for hover/focus states */
+  --ro-primary-hover: #214738;
+  /* Main body text: near-black with a warm undertone */
+  --ro-text: #1f1f1a;
+  /* Secondary / helper text: medium warm grey */
+  --ro-text-muted: #6b6a63;
+  /* Border color: subtle warm grey line */
+  --ro-border: #ddd6ca;
+  /* Semantic success green */
+  --ro-success: #3f7a5f;
+  --ro-success-bg: #edf7f2;
+  /* Semantic warning amber */
+  --ro-warning: #b07a2b;
+  --ro-warning-bg: #fdf6e9;
+  /* Semantic danger/error red */
+  --ro-danger: #a5483f;
+  --ro-danger-bg: #fdf0ef;
+  /* Admin secondary accent — muted teal-blue for admin-specific UI */
+  --ro-admin-accent: #365f73;
+  /* Operator accent — slightly lighter blue for operator-specific UI */
+  --ro-operator-accent: #496d8d;
 
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* ── Typography ── */
+  /* Inter is a highly legible B2B dashboard font; falls back to system-ui */
+  --ro-font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --ro-font-mono: ui-monospace, Consolas, monospace;
 
-  /* Mobile-first: 16px base, scale up on large screens */
-  font: 16px/1.5 var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* ── Spacing scale ── */
+  /* Used to keep consistent rhythm throughout the UI */
+  --ro-sp-1: 4px;
+  --ro-sp-2: 8px;
+  --ro-sp-3: 12px;
+  --ro-sp-4: 16px;
+  --ro-sp-5: 24px;
+  --ro-sp-6: 32px;
+  --ro-sp-7: 48px;
 
-  @media (min-width: 1024px) {
-    font-size: 18px;
-  }
+  /* ── Border radius ── */
+  --ro-radius-sm: 6px;
+  --ro-radius: 10px;
+  --ro-radius-lg: 16px;
+
+  /* ── Shadows ── */
+  /* Subtle depth — we avoid heavy shadows that feel dated */
+  --ro-shadow-sm:
+    0 1px 3px rgba(31, 31, 26, 0.08), 0 1px 2px rgba(31, 31, 26, 0.05);
+  --ro-shadow:
+    0 4px 12px rgba(31, 31, 26, 0.08), 0 1px 4px rgba(31, 31, 26, 0.06);
+  --ro-shadow-lg:
+    0 8px 24px rgba(31, 31, 26, 0.1), 0 2px 8px rgba(31, 31, 26, 0.07);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* ── Global base styles ── */
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-/* Remove Vite template defaults (fixed width, text-align, border).
-   Bootstrap's container-fluid handles layout width on each page. */
+/* Ensure the app fills the full viewport height and stacks vertically */
 #root {
   margin: 0 auto;
   min-height: 100svh;
@@ -63,54 +84,33 @@
 
 body {
   margin: 0;
+  font-family: var(--ro-font-sans);
+  color: var(--ro-text);
+  background-color: var(--ro-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
+/* Typography hierarchy — tighter headings feel more B2B / professional */
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--ro-font-sans);
+  font-weight: 600;
+  color: var(--ro-text);
+  line-height: 1.2;
 }
 
-/* Mobile-first h1 sizing — our pages always use Bootstrap classes (.h4)
-   so this only affects any bare <h1> without a Bootstrap class. */
-h1 {
-  font-size: 2rem;
-  letter-spacing: -0.5px;
-  margin: 1.5rem 0;
-  @media (min-width: 768px) {
-    font-size: 2.5rem;
-  }
-  @media (min-width: 1200px) {
-    font-size: 3.5rem;
-    letter-spacing: -1.68px;
-    margin: 2rem 0;
-  }
+/* Smooth transitions on interactive elements */
+a {
+  color: var(--ro-primary);
+  text-decoration: none;
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+a:hover {
+  color: var(--ro-primary-hover);
+  text-decoration: underline;
 }

@@ -50,68 +50,81 @@ export function AdminTaskDetailPage() {
     <section>
       <div className="d-flex align-items-center gap-3 mb-4">
         <Link to="/admin/tasks" className="btn btn-outline-secondary btn-sm">
-          &larr; Back
+          <i className="bi bi-arrow-left me-1" aria-hidden="true" />
+          Back
         </Link>
         <h1 className="h4 mb-0">Task Detail</h1>
       </div>
 
-      <div className="card shadow-sm">
-        <div className="card-body">
-          <dl className="row mb-0">
-            <dt className="col-sm-3">Status</dt>
-            <dd className="col-sm-9">
+      {/* ro-section-panel: lightly-bounded surface for the detail block. */}
+      <div className="ro-section-panel p-3">
+        <dl className="mb-0">
+          {/* Each dl-row is a 2-column (label / value) grid row with a bottom border. */}
+          <div className="dl-row">
+            <dt>Status</dt>
+            <dd>
               <TaskStatusBadge status={task.status} />
             </dd>
+          </div>
 
-            <dt className="col-sm-3">Property</dt>
-            <dd className="col-sm-9">{task.propertyName ?? "—"}</dd>
+          <div className="dl-row">
+            <dt>Property</dt>
+            <dd>{task.propertyName ?? "—"}</dd>
+          </div>
 
-            <dt className="col-sm-3">Category</dt>
-            <dd className="col-sm-9">{task.category}</dd>
+          <div className="dl-row">
+            <dt>Category</dt>
+            <dd>{task.category}</dd>
+          </div>
 
-            <dt className="col-sm-3">Priority</dt>
-            <dd className="col-sm-9">{task.priority}</dd>
+          <div className="dl-row">
+            <dt>Priority</dt>
+            <dd>{task.priority}</dd>
+          </div>
 
-            <dt className="col-sm-3">Summary</dt>
-            <dd className="col-sm-9">{task.summary}</dd>
+          <div className="dl-row">
+            <dt>Summary</dt>
+            <dd>{task.summary}</dd>
+          </div>
 
-            {task.description && (
-              <>
-                <dt className="col-sm-3">Description</dt>
-                <dd className="col-sm-9">{task.description}</dd>
-              </>
-            )}
+          {task.description && (
+            <div className="dl-row">
+              <dt>Description</dt>
+              <dd>{task.description}</dd>
+            </div>
+          )}
 
-            <dt className="col-sm-3">Dispatch mode</dt>
-            <dd className="col-sm-9">
+          <div className="dl-row">
+            <dt>Dispatch mode</dt>
+            <dd>
               {task.dispatchMode === "POOL" ? "Pool" : "Direct assignment"}
             </dd>
+          </div>
 
-            {task.assigneeName && (
-              <>
-                <dt className="col-sm-3">Assignee</dt>
-                <dd className="col-sm-9">{task.assigneeName}</dd>
-              </>
-            )}
+          {task.assigneeName && (
+            <div className="dl-row">
+              <dt>Assignee</dt>
+              <dd>{task.assigneeName}</dd>
+            </div>
+          )}
 
-            {task.estimatedHours !== null && (
-              <>
-                <dt className="col-sm-3">Estimated hours</dt>
-                <dd className="col-sm-9">{task.estimatedHours}h</dd>
-              </>
-            )}
+          {task.estimatedHours !== null && (
+            <div className="dl-row">
+              <dt>Estimated hours</dt>
+              <dd>{task.estimatedHours}h</dd>
+            </div>
+          )}
 
-            {/* sourceIssueReportId will link to the issue report page when that feature is available. */}
-            {task.sourceIssueReportId && (
-              <>
-                <dt className="col-sm-3">From issue report</dt>
-                <dd className="col-sm-9">
-                  <code>{task.sourceIssueReportId}</code>
-                </dd>
-              </>
-            )}
-          </dl>
-        </div>
+          {/* sourceIssueReportId will link to the issue report page when that feature is available. */}
+          {task.sourceIssueReportId && (
+            <div className="dl-row">
+              <dt>From issue report</dt>
+              <dd>
+                <code>{task.sourceIssueReportId}</code>
+              </dd>
+            </div>
+          )}
+        </dl>
       </div>
     </section>
   );

@@ -14,6 +14,7 @@ import type {
   TaskDispatchMode,
   TaskPriority,
 } from "@/features/tasks/types";
+import { PageHeader } from "@/shared/components/PageHeader";
 
 const CATEGORY_OPTIONS: Array<{ value: TaskCategory; label: string }> = [
   { value: "CLEANING", label: "Cleaning" },
@@ -124,11 +125,9 @@ export function CreateTaskPage() {
   if (loadingData) {
     return (
       <section aria-live="polite">
-        <h1 className="h4 mb-3">New Task</h1>
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            Loading form data…
-          </div>
+        <PageHeader title="New Task" />
+        <div className="ro-form-card text-center text-muted py-4">
+          Loading form data…
         </div>
       </section>
     );
@@ -137,9 +136,13 @@ export function CreateTaskPage() {
   if (loadDataError) {
     return (
       <section aria-live="assertive">
-        <h1 className="h4 mb-3">New Task</h1>
+        <PageHeader title="New Task" />
         <div className="alert alert-danger">{loadDataError}</div>
-        <Link to="/admin/tasks" className="btn btn-outline-secondary btn-sm">
+        <Link
+          to="/admin/tasks"
+          className="btn btn-outline-secondary btn-sm mt-2"
+        >
+          <i className="bi bi-arrow-left me-1" aria-hidden="true" />
           Back to Tasks
         </Link>
       </section>
@@ -148,259 +151,268 @@ export function CreateTaskPage() {
 
   return (
     <section>
-      <div className="d-flex align-items-center gap-3 mb-4">
-        <Link to="/admin/tasks" className="btn btn-outline-secondary btn-sm">
-          &larr; Back
-        </Link>
-        <h1 className="h4 mb-0">New Task</h1>
-      </div>
+      {/* Consistent page header with back nav. */}
+      <PageHeader
+        title="New Task"
+        action={
+          <Link to="/admin/tasks" className="btn btn-outline-secondary btn-sm">
+            <i className="bi bi-arrow-left me-1" aria-hidden="true" />
+            Back to Tasks
+          </Link>
+        }
+      />
 
-      <div className="card shadow-sm">
-        <div className="card-body">
-          {submitError && (
-            <div className="alert alert-danger" role="alert">
-              {submitError}
+      <div className="ro-form-card">
+        {submitError && (
+          <div className="alert alert-danger" role="alert">
+            {submitError}
+          </div>
+        )}
+
+        <form onSubmit={(e) => void handleSubmit(e)} noValidate>
+          {/* Property */}
+          <div className="mb-3">
+            <label htmlFor="propertyId" className="form-label">
+              Property <span className="text-danger">*</span>
+            </label>
+            <select
+              id="propertyId"
+              className={`form-select ${fieldErrors.propertyId ? "is-invalid" : ""}`}
+              value={propertyId}
+              onChange={(e) => setPropertyId(e.target.value)}
+              disabled={submitting}
+            >
+              <option value="">Select a property…</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.city})
+                </option>
+              ))}
+            </select>
+            {fieldErrors.propertyId && (
+              <div className="invalid-feedback">{fieldErrors.propertyId}</div>
+            )}
+          </div>
+
+          {/* Category */}
+          <div className="mb-3">
+            <label htmlFor="category" className="form-label">
+              Category <span className="text-danger">*</span>
+            </label>
+            <select
+              id="category"
+              className="form-select"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value as TaskCategory);
+                // Reset assignee whenever category changes — the previously
+                // selected operator may not belong to the new category.
+                setAssigneeId("");
+                setFieldErrors((prev) => ({
+                  ...prev,
+                  assigneeId: undefined as unknown as string,
+                }));
+              }}
+              disabled={submitting}
+            >
+              {CATEGORY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Priority */}
+          <div className="mb-3">
+            <label htmlFor="priority" className="form-label">
+              Priority <span className="text-danger">*</span>
+            </label>
+            <select
+              id="priority"
+              className="form-select"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as TaskPriority)}
+              disabled={submitting}
+            >
+              {PRIORITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Summary */}
+          <div className="mb-3">
+            <label htmlFor="summary" className="form-label">
+              Summary <span className="text-danger">*</span>
+            </label>
+            <input
+              id="summary"
+              type="text"
+              className={`form-control ${fieldErrors.summary ? "is-invalid" : ""}`}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={255}
+              disabled={submitting}
+            />
+            {fieldErrors.summary && (
+              <div className="invalid-feedback">{fieldErrors.summary}</div>
+            )}
+          </div>
+
+          {/* Description — optional */}
+          <div className="mb-3">
+            <label htmlFor="description" className="form-label">
+              Description
+            </label>
+            <textarea
+              id="description"
+              className="form-control"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={2000}
+              disabled={submitting}
+            />
+          </div>
+
+          {/* Estimated hours — optional */}
+          <div className="mb-3">
+            <label htmlFor="estimatedHours" className="form-label">
+              Estimated hours
+            </label>
+            <input
+              id="estimatedHours"
+              type="number"
+              className={`form-control ${fieldErrors.estimatedHours ? "is-invalid" : ""}`}
+              value={estimatedHours}
+              onChange={(e) => setEstimatedHours(e.target.value)}
+              min="0"
+              step="0.5"
+              disabled={submitting}
+            />
+            {fieldErrors.estimatedHours && (
+              <div className="invalid-feedback">
+                {fieldErrors.estimatedHours}
+              </div>
+            )}
+          </div>
+
+          {/* Dispatch mode — radio */}
+          <div className="mb-3">
+            <span className="form-label d-block">
+              Dispatch mode <span className="text-danger">*</span>
+            </span>
+            <div className="form-check form-check-inline">
+              <input
+                id="modePool"
+                type="radio"
+                className="form-check-input"
+                name="dispatchMode"
+                value="POOL"
+                checked={dispatchMode === "POOL"}
+                onChange={() => {
+                  setDispatchMode("POOL");
+                  // Clear the selected operator when switching back to pool.
+                  setAssigneeId("");
+                }}
+                disabled={submitting}
+              />
+              <label htmlFor="modePool" className="form-check-label">
+                Pool{" "}
+                <small className="text-muted">
+                  (visible to matching operators)
+                </small>
+              </label>
+            </div>
+            <div className="form-check form-check-inline">
+              <input
+                id="modeDirect"
+                type="radio"
+                className="form-check-input"
+                name="dispatchMode"
+                value="DIRECT_ASSIGNMENT"
+                checked={dispatchMode === "DIRECT_ASSIGNMENT"}
+                onChange={() => setDispatchMode("DIRECT_ASSIGNMENT")}
+                disabled={submitting}
+              />
+              <label htmlFor="modeDirect" className="form-check-label">
+                Direct assignment
+              </label>
+            </div>
+          </div>
+
+          {/* Assignee select — shown only for DIRECT_ASSIGNMENT */}
+          {dispatchMode === "DIRECT_ASSIGNMENT" && (
+            <div className="mb-3">
+              <label htmlFor="assigneeId" className="form-label">
+                Operator <span className="text-danger">*</span>
+              </label>
+              <select
+                id="assigneeId"
+                className={`form-select ${fieldErrors.assigneeId ? "is-invalid" : ""}`}
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                // Disabled when no eligible operators exist — selecting would be pointless.
+                disabled={submitting || eligibleOperators.length === 0}
+              >
+                {eligibleOperators.length === 0 ? (
+                  <option value="">
+                    No active operators for this category
+                  </option>
+                ) : (
+                  <>
+                    <option value="">Select an operator…</option>
+                    {eligibleOperators.map((op) => (
+                      <option key={op.id} value={op.id}>
+                        {op.fullName}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
+              {/* Warning shown inline when no operators match the category. */}
+              {eligibleOperators.length === 0 &&
+                dispatchMode === "DIRECT_ASSIGNMENT" && (
+                  <div className="form-text text-warning">
+                    No active operators with specialization{" "}
+                    <strong>{category}</strong>. Consider switching to Pool mode
+                    or creating an operator with this category.
+                  </div>
+                )}
+              {fieldErrors.assigneeId && (
+                <div className="invalid-feedback">{fieldErrors.assigneeId}</div>
+              )}
             </div>
           )}
 
-          <form onSubmit={(e) => void handleSubmit(e)} noValidate>
-            {/* Property */}
-            <div className="mb-3">
-              <label htmlFor="propertyId" className="form-label">
-                Property <span className="text-danger">*</span>
-              </label>
-              <select
-                id="propertyId"
-                className={`form-select ${fieldErrors.propertyId ? "is-invalid" : ""}`}
-                value={propertyId}
-                onChange={(e) => setPropertyId(e.target.value)}
-                disabled={submitting}
-              >
-                <option value="">Select a property…</option>
-                {properties.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.city})
-                  </option>
-                ))}
-              </select>
-              {fieldErrors.propertyId && (
-                <div className="invalid-feedback">{fieldErrors.propertyId}</div>
+          {/* d-grid stacks Create Task and Cancel full-width on mobile. */}
+          <div className="d-grid gap-2 mt-4">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                  Creating…
+                </>
+              ) : (
+                "Create Task"
               )}
-            </div>
-
-            {/* Category */}
-            <div className="mb-3">
-              <label htmlFor="category" className="form-label">
-                Category <span className="text-danger">*</span>
-              </label>
-              <select
-                id="category"
-                className="form-select"
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value as TaskCategory);
-                  // Reset assignee whenever category changes — the previously
-                  // selected operator may not belong to the new category.
-                  setAssigneeId("");
-                  setFieldErrors((prev) => ({
-                    ...prev,
-                    assigneeId: undefined as unknown as string,
-                  }));
-                }}
-                disabled={submitting}
-              >
-                {CATEGORY_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Priority */}
-            <div className="mb-3">
-              <label htmlFor="priority" className="form-label">
-                Priority <span className="text-danger">*</span>
-              </label>
-              <select
-                id="priority"
-                className="form-select"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                disabled={submitting}
-              >
-                {PRIORITY_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Summary */}
-            <div className="mb-3">
-              <label htmlFor="summary" className="form-label">
-                Summary <span className="text-danger">*</span>
-              </label>
-              <input
-                id="summary"
-                type="text"
-                className={`form-control ${fieldErrors.summary ? "is-invalid" : ""}`}
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                maxLength={255}
-                disabled={submitting}
-              />
-              {fieldErrors.summary && (
-                <div className="invalid-feedback">{fieldErrors.summary}</div>
-              )}
-            </div>
-
-            {/* Description — optional */}
-            <div className="mb-3">
-              <label htmlFor="description" className="form-label">
-                Description
-              </label>
-              <textarea
-                id="description"
-                className="form-control"
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                maxLength={2000}
-                disabled={submitting}
-              />
-            </div>
-
-            {/* Estimated hours — optional */}
-            <div className="mb-3">
-              <label htmlFor="estimatedHours" className="form-label">
-                Estimated hours
-              </label>
-              <input
-                id="estimatedHours"
-                type="number"
-                className={`form-control ${fieldErrors.estimatedHours ? "is-invalid" : ""}`}
-                value={estimatedHours}
-                onChange={(e) => setEstimatedHours(e.target.value)}
-                min="0"
-                step="0.5"
-                disabled={submitting}
-              />
-              {fieldErrors.estimatedHours && (
-                <div className="invalid-feedback">
-                  {fieldErrors.estimatedHours}
-                </div>
-              )}
-            </div>
-
-            {/* Dispatch mode — radio */}
-            <div className="mb-3">
-              <span className="form-label d-block">
-                Dispatch mode <span className="text-danger">*</span>
-              </span>
-              <div className="form-check form-check-inline">
-                <input
-                  id="modePool"
-                  type="radio"
-                  className="form-check-input"
-                  name="dispatchMode"
-                  value="POOL"
-                  checked={dispatchMode === "POOL"}
-                  onChange={() => {
-                    setDispatchMode("POOL");
-                    // Clear the selected operator when switching back to pool.
-                    setAssigneeId("");
-                  }}
-                  disabled={submitting}
-                />
-                <label htmlFor="modePool" className="form-check-label">
-                  Pool{" "}
-                  <small className="text-muted">
-                    (visible to matching operators)
-                  </small>
-                </label>
-              </div>
-              <div className="form-check form-check-inline">
-                <input
-                  id="modeDirect"
-                  type="radio"
-                  className="form-check-input"
-                  name="dispatchMode"
-                  value="DIRECT_ASSIGNMENT"
-                  checked={dispatchMode === "DIRECT_ASSIGNMENT"}
-                  onChange={() => setDispatchMode("DIRECT_ASSIGNMENT")}
-                  disabled={submitting}
-                />
-                <label htmlFor="modeDirect" className="form-check-label">
-                  Direct assignment
-                </label>
-              </div>
-            </div>
-
-            {/* Assignee select — shown only for DIRECT_ASSIGNMENT */}
-            {dispatchMode === "DIRECT_ASSIGNMENT" && (
-              <div className="mb-3">
-                <label htmlFor="assigneeId" className="form-label">
-                  Operator <span className="text-danger">*</span>
-                </label>
-                <select
-                  id="assigneeId"
-                  className={`form-select ${fieldErrors.assigneeId ? "is-invalid" : ""}`}
-                  value={assigneeId}
-                  onChange={(e) => setAssigneeId(e.target.value)}
-                  // Disabled when no eligible operators exist — selecting would be pointless.
-                  disabled={submitting || eligibleOperators.length === 0}
-                >
-                  {eligibleOperators.length === 0 ? (
-                    <option value="">
-                      No active operators for this category
-                    </option>
-                  ) : (
-                    <>
-                      <option value="">Select an operator…</option>
-                      {eligibleOperators.map((op) => (
-                        <option key={op.id} value={op.id}>
-                          {op.fullName}
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </select>
-                {/* Warning shown inline when no operators match the category. */}
-                {eligibleOperators.length === 0 &&
-                  dispatchMode === "DIRECT_ASSIGNMENT" && (
-                    <div className="form-text text-warning">
-                      No active operators with specialization{" "}
-                      <strong>{category}</strong>. Consider switching to Pool
-                      mode or creating an operator with this category.
-                    </div>
-                  )}
-                {fieldErrors.assigneeId && (
-                  <div className="invalid-feedback">
-                    {fieldErrors.assigneeId}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* d-grid stacks Create Task and Cancel full-width on mobile.
-                On desktop both buttons are full-width inside the card, which is
-                acceptable because the card constrains max-width via the layout. */}
-            <div className="d-grid gap-2 mt-4">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={submitting}
-              >
-                {submitting ? "Creating…" : "Create Task"}
-              </button>
-              <Link to="/admin/tasks" className="btn btn-outline-secondary">
-                Cancel
-              </Link>
-            </div>
-          </form>
-        </div>
+            </button>
+            <Link to="/admin/tasks" className="btn btn-outline-secondary">
+              Cancel
+            </Link>
+          </div>
+        </form>
       </div>
     </section>
   );

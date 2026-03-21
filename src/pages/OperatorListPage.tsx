@@ -14,6 +14,9 @@ import {
   enableOperator,
 } from "@/features/operators/api/operatorsApi";
 import type { OperatorListItem } from "@/features/operators/types";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 interface OperatorListLocationState {
   successMessage?: string;
@@ -49,21 +52,23 @@ export function OperatorListPage() {
     }
   }
 
+  // Shared CTA used in the PageHeader across all render branches
+  const addOperatorCTA = (
+    <Link to="/admin/operators/new" className="btn btn-primary">
+      <i className="bi bi-person-plus me-2" aria-hidden="true" />
+      Add Operator
+    </Link>
+  );
+
   if (loading) {
     return (
       <section aria-live="polite">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Team</h1>
-          <Link
-            to="/admin/operators/new"
-            className="btn btn-primary"
-            aria-disabled
+        <PageHeader title="Team" action={addOperatorCTA} />
+        <div className="ro-section-panel">
+          <div
+            className="p-4 text-center"
+            style={{ color: "var(--ro-text-muted)" }}
           >
-            Add Operator
-          </Link>
-        </div>
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
             Loading operators...
           </div>
         </div>
@@ -74,13 +79,7 @@ export function OperatorListPage() {
   if (error) {
     return (
       <section aria-live="assertive">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Team</h1>
-          <Link to="/admin/operators/new" className="btn btn-primary">
-            Add Operator
-          </Link>
-        </div>
-
+        <PageHeader title="Team" action={addOperatorCTA} />
         <div className="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2">
           <span>{error}</span>
           <button
@@ -100,36 +99,24 @@ export function OperatorListPage() {
   if (operators.length === 0) {
     return (
       <section>
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Team</h1>
-          <Link to="/admin/operators/new" className="btn btn-primary">
-            Add Operator
-          </Link>
-        </div>
-
-        <div className="card shadow-sm">
-          <div className="card-body py-5 text-center">
-            <h2 className="h6 mb-2">No operators yet</h2>
-            <p className="text-muted mb-4">
-              Create your first operator to start building your tenant team.
-            </p>
+        <PageHeader title="Team" action={addOperatorCTA} />
+        <EmptyState
+          icon="bi-people"
+          title="No operators yet"
+          message="Create your first operator to start building your tenant team."
+          action={
             <Link to="/admin/operators/new" className="btn btn-primary">
               Create first operator
             </Link>
-          </div>
-        </div>
+          }
+        />
       </section>
     );
   }
 
   return (
     <section>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="h4 mb-0">Team</h1>
-        <Link to="/admin/operators/new" className="btn btn-primary">
-          Add Operator
-        </Link>
-      </div>
+      <PageHeader title="Team" action={addOperatorCTA} />
 
       {successMessage && (
         <div className="alert alert-success" role="status">
@@ -155,23 +142,25 @@ export function OperatorListPage() {
            This avoids horizontal scrolling on small screens. */}
       <div className="d-block d-md-none">
         {operators.map((operator) => (
-          <div key={operator.id} className="card mb-3 shadow-sm">
+          <div key={operator.id} className="ro-task-card">
             <div className="card-body">
               {/* Row 1: name + status badge */}
               <div className="d-flex justify-content-between align-items-center mb-1">
-                <span className="fw-semibold">{operator.fullName}</span>
                 <span
-                  className={`badge ${
-                    operator.status === "ACTIVE"
-                      ? "text-bg-success"
-                      : "text-bg-secondary"
-                  }`}
+                  className="fw-semibold"
+                  style={{ color: "var(--ro-text)" }}
                 >
-                  {operator.status}
+                  {operator.fullName}
                 </span>
+                <StatusBadge status={operator.status} type="operator" />
               </div>
               {/* Row 2: email */}
-              <div className="text-muted small mb-1">{operator.email}</div>
+              <div
+                className="mb-1"
+                style={{ fontSize: "0.875rem", color: "var(--ro-text-muted)" }}
+              >
+                {operator.email}
+              </div>
               {/* Row 3: specialization badge */}
               <div className="mb-3">
                 <span className="badge text-bg-light border">
@@ -220,10 +209,10 @@ export function OperatorListPage() {
 
       {/* ── Desktop table — visible on md and above ── */}
       <div className="d-none d-md-block">
-        <div className="card shadow-sm">
+        <div className="ro-section-panel">
           <div className="table-responsive">
-            <table className="table align-middle mb-0">
-              <thead className="table-light">
+            <table className="table table-hover align-middle mb-0">
+              <thead>
                 <tr>
                   <th scope="col">Name</th>
                   <th scope="col">Email</th>
@@ -235,19 +224,13 @@ export function OperatorListPage() {
               <tbody>
                 {operators.map((operator) => (
                   <tr key={operator.id}>
-                    <td>{operator.fullName}</td>
-                    <td>{operator.email}</td>
+                    <td className="fw-medium">{operator.fullName}</td>
+                    <td style={{ color: "var(--ro-text-muted)" }}>
+                      {operator.email}
+                    </td>
                     <td>{operator.specializationCategory}</td>
                     <td>
-                      <span
-                        className={`badge ${
-                          operator.status === "ACTIVE"
-                            ? "text-bg-success"
-                            : "text-bg-secondary"
-                        }`}
-                      >
-                        {operator.status}
-                      </span>
+                      <StatusBadge status={operator.status} type="operator" />
                     </td>
                     {/* Actions: Edit always visible; Disable/Enable toggled by status */}
                     <td>

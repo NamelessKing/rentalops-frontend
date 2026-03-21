@@ -30,9 +30,20 @@ export function AdminLayout() {
   return (
     <div className="d-flex flex-column min-vh-100">
       {/* ── Top navigation bar ── */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+      {/* ro-admin-nav class: light surface bg with primary-colored brand and
+          subtle bottom border. Defined in src/styles/theme.css. */}
+      <nav className="navbar navbar-expand-lg ro-admin-nav px-3">
         {/* Brand / logo area */}
-        <span className="navbar-brand fw-bold">RentalOps Admin</span>
+        <span className="navbar-brand fw-bold">
+          RentalOps
+          {/* Muted sub-label so users know they're in the admin zone */}
+          <span
+            className="ms-1 text-muted fw-normal"
+            style={{ fontSize: "0.75rem", opacity: 0.65 }}
+          >
+            Admin
+          </span>
+        </span>
 
         {/* Mobile toggle button — collapses links on small screens */}
         <button
@@ -107,12 +118,15 @@ export function AdminLayout() {
                long names from overflowing the navbar on small screens. */}
           <div className="d-flex align-items-center gap-3">
             {/* Full name on sm and above */}
-            <span className="d-none d-sm-inline text-light small">
+            <span
+              className="d-none d-sm-inline small"
+              style={{ color: "var(--ro-text-muted)" }}
+            >
               {user?.fullName}
             </span>
-            {/* Initials only on xs */}
+            {/* Avatar circle with initials on xs */}
             <span
-              className="d-inline d-sm-none text-light small fw-semibold"
+              className="d-inline d-sm-none ro-nav-avatar"
               aria-label={user?.fullName ?? "User"}
             >
               {user?.fullName
@@ -123,7 +137,7 @@ export function AdminLayout() {
                 .slice(0, 2)}
             </span>
             <button
-              className="btn btn-outline-light btn-sm"
+              className="btn btn-outline-secondary btn-sm"
               onClick={() => {
                 closeMenu();
                 logout();
@@ -136,8 +150,8 @@ export function AdminLayout() {
       </nav>
 
       {/* ── Page content area ── */}
-      {/* container-fluid + py-4 gives consistent padding on all Admin pages */}
-      <main className="container-fluid py-4 flex-grow-1">
+      {/* container-fluid + ro-page-content gives consistent padding on all Admin pages */}
+      <main className="container-fluid ro-page-content flex-grow-1">
         {/* React Router renders the matched child route here */}
         <Outlet />
       </main>

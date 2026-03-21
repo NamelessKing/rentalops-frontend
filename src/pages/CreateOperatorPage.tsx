@@ -8,6 +8,7 @@ import { useState, type ComponentProps } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCreateOperator } from "@/features/operators/hooks/useCreateOperator";
 import type { SpecializationCategory } from "@/features/operators/types";
+import { PageHeader } from "@/shared/components/PageHeader";
 
 const specializationOptions: Array<{
   value: SpecializationCategory;
@@ -89,138 +90,152 @@ export function CreateOperatorPage() {
 
   return (
     <section>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="h4 mb-0">Create Operator</h1>
-        <Link to="/admin/operators" className="btn btn-outline-secondary">
-          Back to Team
-        </Link>
-      </div>
+      {/* PageHeader provides a consistent title + subtitle + back-nav button across all create pages. */}
+      <PageHeader
+        title="Create Operator"
+        subtitle="Create an operator account and share the initial password manually."
+        action={
+          <Link
+            to="/admin/operators"
+            className="btn btn-outline-secondary btn-sm"
+          >
+            <i className="bi bi-arrow-left me-1" aria-hidden="true" />
+            Back to Team
+          </Link>
+        }
+      />
 
-      <div className="card shadow-sm">
-        <div className="card-body p-4">
-          <p className="text-muted mb-4">
-            Create an operator account and share the initial password manually.
-          </p>
+      {/* ro-form-card gives the form a max-width + warm-surface card appearance. */}
+      <div className="ro-form-card">
+        {error && <div className="alert alert-danger">{error}</div>}
 
-          {error && <div className="alert alert-danger">{error}</div>}
-
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="mb-3">
-              <label htmlFor="fullName" className="form-label">
-                Full name
-              </label>
-              <input
-                id="fullName"
-                className={`form-control ${fieldErrors.fullName ? "is-invalid" : ""}`}
-                value={fullName}
-                onChange={(e) => {
-                  setFullName(e.target.value);
-                  if (fieldErrors.fullName) {
-                    setFieldErrors((prev) => ({
-                      ...prev,
-                      fullName: undefined,
-                    }));
-                  }
-                }}
-                placeholder="Giulia Verdi"
-                disabled={submitting}
-                required
-              />
-              {fieldErrors.fullName && (
-                <div className="invalid-feedback">{fieldErrors.fullName}</div>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className={`form-control ${fieldErrors.email ? "is-invalid" : ""}`}
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (fieldErrors.email) {
-                    setFieldErrors((prev) => ({ ...prev, email: undefined }));
-                  }
-                }}
-                placeholder="giulia@example.com"
-                autoComplete="email"
-                disabled={submitting}
-                required
-              />
-              {fieldErrors.email && (
-                <div className="invalid-feedback">{fieldErrors.email}</div>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="initialPassword" className="form-label">
-                Initial password
-              </label>
-              <input
-                id="initialPassword"
-                type="password"
-                className={`form-control ${fieldErrors.initialPassword ? "is-invalid" : ""}`}
-                value={initialPassword}
-                onChange={(e) => {
-                  setInitialPassword(e.target.value);
-                  if (fieldErrors.initialPassword) {
-                    setFieldErrors((prev) => ({
-                      ...prev,
-                      initialPassword: undefined,
-                    }));
-                  }
-                }}
-                autoComplete="new-password"
-                disabled={submitting}
-                required
-              />
-              {fieldErrors.initialPassword && (
-                <div className="invalid-feedback">
-                  {fieldErrors.initialPassword}
-                </div>
-              )}
-              <div className="form-text">
-                Use at least 8 characters. Backend also requires uppercase,
-                number, and special character.
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="specializationCategory" className="form-label">
-                Specialization
-              </label>
-              <select
-                id="specializationCategory"
-                className="form-select"
-                value={specializationCategory}
-                onChange={(e) =>
-                  setSpecializationCategory(
-                    e.target.value as SpecializationCategory,
-                  )
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-3">
+            <label htmlFor="fullName" className="form-label">
+              Full name
+            </label>
+            <input
+              id="fullName"
+              className={`form-control ${fieldErrors.fullName ? "is-invalid" : ""}`}
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                if (fieldErrors.fullName) {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    fullName: undefined,
+                  }));
                 }
-                disabled={submitting}
-              >
-                {specializationOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              }}
+              placeholder="Giulia Verdi"
+              disabled={submitting}
+              required
+            />
+            {fieldErrors.fullName && (
+              <div className="invalid-feedback">{fieldErrors.fullName}</div>
+            )}
+          </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary w-100"
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              className={`form-control ${fieldErrors.email ? "is-invalid" : ""}`}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldErrors.email) {
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }
+              }}
+              placeholder="giulia@example.com"
+              autoComplete="email"
+              disabled={submitting}
+              required
+            />
+            {fieldErrors.email && (
+              <div className="invalid-feedback">{fieldErrors.email}</div>
+            )}
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="initialPassword" className="form-label">
+              Initial password
+            </label>
+            <input
+              id="initialPassword"
+              type="password"
+              className={`form-control ${fieldErrors.initialPassword ? "is-invalid" : ""}`}
+              value={initialPassword}
+              onChange={(e) => {
+                setInitialPassword(e.target.value);
+                if (fieldErrors.initialPassword) {
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    initialPassword: undefined,
+                  }));
+                }
+              }}
+              autoComplete="new-password"
+              disabled={submitting}
+              required
+            />
+            {fieldErrors.initialPassword && (
+              <div className="invalid-feedback">
+                {fieldErrors.initialPassword}
+              </div>
+            )}
+            <div className="form-text">
+              Use at least 8 characters. Backend also requires uppercase,
+              number, and special character.
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="specializationCategory" className="form-label">
+              Specialization
+            </label>
+            <select
+              id="specializationCategory"
+              className="form-select"
+              value={specializationCategory}
+              onChange={(e) =>
+                setSpecializationCategory(
+                  e.target.value as SpecializationCategory,
+                )
+              }
               disabled={submitting}
             >
-              {submitting ? "Creating..." : "Create Operator"}
-            </button>
-          </form>
-        </div>
+              {specializationOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary w-100"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                />
+                Creating…
+              </>
+            ) : (
+              "Create Operator"
+            )}
+          </button>
+        </form>
       </div>
     </section>
   );

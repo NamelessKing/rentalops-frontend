@@ -16,6 +16,8 @@ import type {
   OperatorListItem,
   SpecializationCategory,
 } from "@/features/operators/types";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { StatusBadge } from "@/shared/components/StatusBadge";
 
 // Shape of the optional state passed from OperatorListPage via the Edit link.
 // Sending it here avoids a redundant API call on normal navigation.
@@ -54,11 +56,9 @@ export function EditOperatorPage() {
   if (loading) {
     return (
       <section aria-live="polite">
-        <h1 className="h4 mb-3">Edit Operator</h1>
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            Loading operator details...
-          </div>
+        <PageHeader title="Edit Operator" />
+        <div className="ro-form-card text-center text-muted py-4">
+          Loading operator details…
         </div>
       </section>
     );
@@ -67,9 +67,13 @@ export function EditOperatorPage() {
   if (error) {
     return (
       <section aria-live="assertive">
-        <h1 className="h4 mb-3">Edit Operator</h1>
+        <PageHeader title="Edit Operator" />
         <div className="alert alert-danger">{error}</div>
-        <Link to="/admin/operators" className="btn btn-outline-secondary">
+        <Link
+          to="/admin/operators"
+          className="btn btn-outline-secondary btn-sm mt-2"
+        >
+          <i className="bi bi-arrow-left me-1" aria-hidden="true" />
           Back to Team
         </Link>
       </section>
@@ -84,162 +88,155 @@ export function EditOperatorPage() {
 
   return (
     <section>
-      {/* Page header with back navigation */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="h4 mb-0">Edit Operator</h1>
-        <Link
-          to="/admin/operators"
-          className="btn btn-outline-secondary btn-sm"
-        >
-          Back to Team
-        </Link>
-      </div>
+      {/* PageHeader with back-nav action. */}
+      <PageHeader
+        title="Edit Operator"
+        action={
+          <Link
+            to="/admin/operators"
+            className="btn btn-outline-secondary btn-sm"
+          >
+            <i className="bi bi-arrow-left me-1" aria-hidden="true" />
+            Back to Team
+          </Link>
+        }
+      />
 
-      <div className="card shadow-sm">
-        <div className="card-body">
-          {/* Read-only status badge — updates immediately after toggle */}
+      <div className="ro-form-card">
+        {/* Status badge — read-only, updates immediately after toggle. */}
+        <div className="mb-3">
+          <span className="text-muted me-2">Status:</span>
+          <StatusBadge status={data.status} type="operator" />
+        </div>
+
+        {/* Feedback alerts — only one should be visible at a time */}
+        {saveSuccess && (
+          <div className="alert alert-success py-2" role="status">
+            Operator updated successfully.
+          </div>
+        )}
+        {saveError && (
+          <div className="alert alert-danger py-2" role="alert">
+            {saveError}
+          </div>
+        )}
+        {toggleError && (
+          <div className="alert alert-warning py-2" role="alert">
+            {toggleError}
+          </div>
+        )}
+
+        {/* Edit form — fields pre-populated from current operator data */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void save();
+          }}
+          noValidate
+        >
           <div className="mb-3">
-            <span className="text-muted me-2">Status:</span>
-            <span
-              className={`badge ${
-                isActive ? "text-bg-success" : "text-bg-secondary"
-              }`}
-            >
-              {data.status}
-            </span>
+            <label htmlFor="fullName" className="form-label">
+              Full name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              className="form-control"
+              value={draft.fullName}
+              onChange={(e) => setDraft({ ...draft, fullName: e.target.value })}
+              required
+              disabled={saving || toggling}
+            />
           </div>
 
-          {/* Feedback alerts — only one should be visible at a time */}
-          {saveSuccess && (
-            <div className="alert alert-success py-2" role="status">
-              Operator updated successfully.
-            </div>
-          )}
-          {saveError && (
-            <div className="alert alert-danger py-2" role="alert">
-              {saveError}
-            </div>
-          )}
-          {toggleError && (
-            <div className="alert alert-warning py-2" role="alert">
-              {toggleError}
-            </div>
-          )}
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="form-control"
+              value={draft.email}
+              onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+              required
+              disabled={saving || toggling}
+            />
+          </div>
 
-          {/* Edit form — fields pre-populated from current operator data */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void save();
-            }}
-            noValidate
-          >
-            <div className="mb-3">
-              <label htmlFor="fullName" className="form-label">
-                Full name
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                className="form-control"
-                value={draft.fullName}
-                onChange={(e) =>
-                  setDraft({ ...draft, fullName: e.target.value })
-                }
-                required
-                disabled={saving || toggling}
-              />
+          {/* Password is always optional on edit — blank means keep existing */}
+          <div className="mb-3">
+            <label htmlFor="newPassword" className="form-label">
+              New password
+            </label>
+            <input
+              id="newPassword"
+              type="password"
+              className="form-control"
+              value={draft.newPassword}
+              placeholder="Leave blank to keep current password"
+              onChange={(e) =>
+                setDraft({ ...draft, newPassword: e.target.value })
+              }
+              disabled={saving || toggling}
+            />
+            <div className="form-text">
+              Leave blank to keep the existing password unchanged.
             </div>
+          </div>
 
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="form-control"
-                value={draft.email}
-                onChange={(e) => setDraft({ ...draft, email: e.target.value })}
-                required
-                disabled={saving || toggling}
-              />
-            </div>
+          <div className="mb-4">
+            <label htmlFor="specializationCategory" className="form-label">
+              Specialization
+            </label>
+            <select
+              id="specializationCategory"
+              className="form-select"
+              value={draft.specializationCategory}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  specializationCategory: e.target
+                    .value as SpecializationCategory,
+                })
+              }
+              disabled={saving || toggling}
+            >
+              <option value="CLEANING">CLEANING</option>
+              <option value="PLUMBING">PLUMBING</option>
+              <option value="ELECTRICAL">ELECTRICAL</option>
+              <option value="GENERAL_MAINTENANCE">GENERAL_MAINTENANCE</option>
+            </select>
+          </div>
 
-            {/* Password is always optional on edit — blank means keep existing */}
-            <div className="mb-3">
-              <label htmlFor="newPassword" className="form-label">
-                New password
-              </label>
-              <input
-                id="newPassword"
-                type="password"
-                className="form-control"
-                value={draft.newPassword}
-                placeholder="Leave blank to keep current password"
-                onChange={(e) =>
-                  setDraft({ ...draft, newPassword: e.target.value })
-                }
-                disabled={saving || toggling}
-              />
-              <div className="form-text">
-                Leave blank to keep the existing password unchanged.
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="specializationCategory" className="form-label">
-                Specialization
-              </label>
-              <select
-                id="specializationCategory"
-                className="form-select"
-                value={draft.specializationCategory}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    specializationCategory: e.target
-                      .value as SpecializationCategory,
-                  })
-                }
-                disabled={saving || toggling}
-              >
-                <option value="CLEANING">CLEANING</option>
-                <option value="PLUMBING">PLUMBING</option>
-                <option value="ELECTRICAL">ELECTRICAL</option>
-                <option value="GENERAL_MAINTENANCE">GENERAL_MAINTENANCE</option>
-              </select>
-            </div>
-
-            {/* Primary CTA: save form + secondary CTA: toggle status.
+          {/* Primary CTA: save form + secondary CTA: toggle status.
                 d-grid stacks the buttons full-width on every screen — important on mobile. */}
-            <div className="d-grid gap-2">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={saving || toggling}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
+          <div className="d-grid gap-2">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={saving || toggling}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
 
-              {/* Disable/Enable button — label and colour change based on current status */}
-              <button
-                type="button"
-                className={`btn ${
-                  isActive ? "btn-outline-danger" : "btn-outline-success"
-                }`}
-                onClick={() => void toggleStatus()}
-                disabled={saving || toggling}
-              >
-                {toggling
-                  ? "Updating..."
-                  : isActive
-                    ? "Disable Operator"
-                    : "Enable Operator"}
-              </button>
-            </div>
-          </form>
-        </div>
+            {/* Disable/Enable button — label and colour change based on current status */}
+            <button
+              type="button"
+              className={`btn ${
+                isActive ? "btn-outline-danger" : "btn-outline-success"
+              }`}
+              onClick={() => void toggleStatus()}
+              disabled={saving || toggling}
+            >
+              {toggling
+                ? "Updating..."
+                : isActive
+                  ? "Disable Operator"
+                  : "Enable Operator"}
+            </button>
+          </div>
+        </form>
       </div>
     </section>
   );

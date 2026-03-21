@@ -63,10 +63,8 @@ export function OperatorPoolPage() {
     return (
       <section aria-live="polite">
         <h1 className="h4 mb-3">Task Pool</h1>
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            Loading available tasks…
-          </div>
+        <div className="ro-task-card text-center text-muted py-4">
+          Loading available tasks…
         </div>
       </section>
     );
@@ -113,16 +111,18 @@ export function OperatorPoolPage() {
       )}
 
       {tasks.length === 0 ? (
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            No tasks available for your category.
-          </div>
+        <div className="ro-empty-state">
+          <i className="bi bi-inbox" aria-hidden="true" />
+          <strong>No tasks available.</strong>
+          <p className="mb-0 small">
+            No pool tasks match your specialization right now.
+          </p>
         </div>
       ) : (
         <div className="row row-cols-1 row-cols-md-2 g-3">
           {tasks.map((task) => (
             <div key={task.id} className="col">
-              <div className="card h-100 shadow-sm">
+              <div className="ro-task-card h-100">
                 <div className="card-body">
                   <h6 className="card-title mb-1">{task.summary}</h6>
                   <p className="text-muted small mb-0">
@@ -135,11 +135,21 @@ export function OperatorPoolPage() {
                   <button
                     type="button"
                     className="btn btn-primary w-100"
-                    // Disable the card being claimed; allow all other cards.
                     disabled={claimingId === task.id}
                     onClick={() => void handleClaim(task.id)}
                   >
-                    {claimingId === task.id ? "Claiming…" : "Claim"}
+                    {claimingId === task.id ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                        Claiming…
+                      </>
+                    ) : (
+                      "Claim"
+                    )}
                   </button>
                 </div>
               </div>

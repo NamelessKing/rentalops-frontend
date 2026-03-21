@@ -68,17 +68,32 @@ export function RegisterPage() {
   };
 
   return (
-    <div
-      className="card shadow-sm"
-      style={{ width: "100%", maxWidth: "520px" }}
-    >
-      <div className="card-body p-4 p-md-5">
-        <h1 className="h4 mb-2">Create workspace</h1>
-        <p className="text-muted mb-4">
+    <div className="ro-auth-wrapper ro-auth-wrapper--wide">
+      {/* Brand mark above the form */}
+      <div className="ro-auth-brand">
+        <div className="ro-auth-brand-name">
+          <i className="bi bi-building me-1" aria-hidden="true" />
+          RentalOps
+        </div>
+        <div className="ro-auth-brand-tagline">Property task management</div>
+      </div>
+
+      <div className="ro-auth-card">
+        <h1 className="h5 fw-semibold mb-1" style={{ color: "var(--ro-text)" }}>
+          Create workspace
+        </h1>
+        <p
+          className="mb-4"
+          style={{ fontSize: "0.875rem", color: "var(--ro-text-muted)" }}
+        >
           Register the first admin account for your tenant.
         </p>
 
-        {error && <div className="alert alert-danger">{error}</div>}
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
@@ -152,7 +167,7 @@ export function RegisterPage() {
             )}
           </div>
 
-          <div className="mb-3">
+          <div className="mb-4">
             <label htmlFor="workspaceName" className="form-label">
               Workspace name
             </label>
@@ -185,11 +200,25 @@ export function RegisterPage() {
             className="btn btn-primary w-100"
             disabled={submitting}
           >
-            {submitting ? "Creating workspace..." : "Create workspace"}
+            {submitting ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                />
+                Creating workspace...
+              </>
+            ) : (
+              "Create workspace"
+            )}
           </button>
         </form>
 
-        <p className="small text-muted mt-3 mb-0 text-center">
+        <p
+          className="small text-center mt-4 mb-0"
+          style={{ color: "var(--ro-text-muted)" }}
+        >
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>

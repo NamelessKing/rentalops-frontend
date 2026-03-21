@@ -8,13 +8,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useTaskListAdmin } from "@/features/tasks/hooks/useTaskListAdmin";
 import { TaskStatusBadge } from "@/features/tasks/components/TaskStatusBadge";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { EmptyState } from "@/shared/components/EmptyState";
 
-// Bootstrap bg-* class per priority level — keeps it readable at a glance.
+// Maps priority level to the custom badge class from theme.css.
+// These use design tokens rather than raw Bootstrap bg-* classes.
 const PRIORITY_BADGE: Record<string, string> = {
-  LOW: "bg-success",
-  MEDIUM: "bg-info text-dark",
-  HIGH: "bg-warning text-dark",
-  CRITICAL: "bg-danger",
+  LOW: "ro-badge-low",
+  MEDIUM: "ro-badge-medium",
+  HIGH: "ro-badge-high",
+  CRITICAL: "ro-badge-critical",
 };
 
 const DISPATCH_LABELS: Record<string, string> = {
@@ -26,17 +29,23 @@ export function TaskListAdminPage() {
   const navigate = useNavigate();
   const { data, loading, error, reload } = useTaskListAdmin();
 
+  // Shared CTA button for New Task
+  const newTaskCTA = (
+    <Link to="/admin/tasks/new" className="btn btn-primary">
+      <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+      New Task
+    </Link>
+  );
+
   if (loading) {
     return (
       <section aria-live="polite">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Tasks</h1>
-          <Link to="/admin/tasks/new" className="btn btn-primary" aria-disabled>
-            New Task
-          </Link>
-        </div>
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
+        <PageHeader title="Tasks" action={newTaskCTA} />
+        <div className="ro-section-panel">
+          <div
+            className="p-4 text-center"
+            style={{ color: "var(--ro-text-muted)" }}
+          >
             Loading tasks…
           </div>
         </div>
@@ -47,12 +56,7 @@ export function TaskListAdminPage() {
   if (error) {
     return (
       <section aria-live="assertive">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Tasks</h1>
-          <Link to="/admin/tasks/new" className="btn btn-primary">
-            New Task
-          </Link>
-        </div>
+        <PageHeader title="Tasks" action={newTaskCTA} />
         <div className="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2">
           <span>{error}</span>
           <button
@@ -71,20 +75,19 @@ export function TaskListAdminPage() {
 
   return (
     <section>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="h4 mb-0">Tasks</h1>
-        <Link to="/admin/tasks/new" className="btn btn-primary">
-          New Task
-        </Link>
-      </div>
+      <PageHeader title="Tasks" action={newTaskCTA} />
 
       {tasks.length === 0 ? (
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            No tasks yet.{" "}
-            <Link to="/admin/tasks/new">Create the first one.</Link>
-          </div>
-        </div>
+        <EmptyState
+          icon="bi-clipboard-check"
+          title="No tasks yet"
+          message="Create your first task to start coordinating your team's work."
+          action={
+            <Link to="/admin/tasks/new" className="btn btn-primary">
+              Create first task
+            </Link>
+          }
+        />
       ) : (
         <>
           {/* ── Mobile card list — visible on xs/sm (below md breakpoint) ──
@@ -94,7 +97,7 @@ export function TaskListAdminPage() {
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="card mb-3 shadow-sm"
+                className="ro-task-card"
                 style={{ cursor: "pointer" }}
                 onClick={() => navigate(`/admin/tasks/${task.id}`)}
                 role="button"
@@ -103,27 +106,25 @@ export function TaskListAdminPage() {
                 <div className="card-body">
                   {/* Row 1: summary + status badge */}
                   <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
-                    <h6 className="card-title mb-0">{task.summary}</h6>
+                    <span className="ro-card-title">{task.summary}</span>
                     <TaskStatusBadge status={task.status} />
                   </div>
                   {/* Row 2: property · category */}
-                  <p className="text-muted small mb-2">
+                  <p className="ro-card-meta mb-2">
                     {task.propertyName ?? "—"} &middot; {task.category}
                   </p>
                   {/* Row 3: priority badge + dispatch mode badge + optional assignee */}
                   <div className="d-flex flex-wrap align-items-center gap-2">
                     <span
-                      className={`badge ${PRIORITY_BADGE[task.priority] ?? "bg-secondary"}`}
+                      className={`badge ${PRIORITY_BADGE[task.priority] ?? "ro-badge-medium"}`}
                     >
                       {task.priority}
                     </span>
-                    <span className="badge text-bg-light border">
+                    <span className="badge ro-badge-pending">
                       {DISPATCH_LABELS[task.dispatchMode] ?? task.dispatchMode}
                     </span>
                     {task.assigneeName && (
-                      <span className="small text-muted">
-                        {task.assigneeName}
-                      </span>
+                      <span className="ro-card-meta">{task.assigneeName}</span>
                     )}
                   </div>
                 </div>
@@ -133,10 +134,10 @@ export function TaskListAdminPage() {
 
           {/* ── Desktop table — visible on md and above ── */}
           <div className="d-none d-md-block">
-            <div className="card shadow-sm">
+            <div className="ro-section-panel">
               <div className="table-responsive">
                 <table className="table table-hover mb-0">
-                  <thead className="table-light">
+                  <thead>
                     <tr>
                       <th>Property</th>
                       <th>Category</th>
@@ -154,24 +155,38 @@ export function TaskListAdminPage() {
                         style={{ cursor: "pointer" }}
                         onClick={() => navigate(`/admin/tasks/${task.id}`)}
                       >
-                        <td>{task.propertyName ?? "—"}</td>
+                        <td style={{ color: "var(--ro-text-muted)" }}>
+                          {task.propertyName ?? "—"}
+                        </td>
                         <td>{task.category}</td>
                         <td>
                           <span
-                            className={`badge ${PRIORITY_BADGE[task.priority] ?? "bg-secondary"}`}
+                            className={`badge ${PRIORITY_BADGE[task.priority] ?? "ro-badge-medium"}`}
                           >
                             {task.priority}
                           </span>
                         </td>
-                        <td>{task.summary}</td>
+                        <td className="fw-medium">{task.summary}</td>
                         <td>
                           <TaskStatusBadge status={task.status} />
                         </td>
-                        <td>
+                        <td
+                          style={{
+                            color: "var(--ro-text-muted)",
+                            fontSize: "0.875rem",
+                          }}
+                        >
                           {DISPATCH_LABELS[task.dispatchMode] ??
                             task.dispatchMode}
                         </td>
-                        <td>{task.assigneeName ?? "—"}</td>
+                        <td
+                          style={{
+                            color: "var(--ro-text-muted)",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {task.assigneeName ?? "—"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

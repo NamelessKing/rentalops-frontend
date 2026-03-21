@@ -8,6 +8,9 @@
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { usePropertyList } from "@/features/properties/hooks/usePropertyList";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 interface PropertyListLocationState {
   successMessage?: string;
@@ -19,22 +22,22 @@ export function PropertyListPage() {
     ?.successMessage;
   const { data, loading, error, reload } = usePropertyList();
 
+  const addPropertyCTA = (
+    <Link to="/admin/properties/new" className="btn btn-primary">
+      <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+      Add Property
+    </Link>
+  );
+
   if (loading) {
     return (
       <section aria-live="polite">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Properties</h1>
-          <Link
-            to="/admin/properties/new"
-            className="btn btn-primary"
-            aria-disabled
+        <PageHeader title="Properties" action={addPropertyCTA} />
+        <div className="ro-section-panel">
+          <div
+            className="p-4 text-center"
+            style={{ color: "var(--ro-text-muted)" }}
           >
-            Add Property
-          </Link>
-        </div>
-
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
             Loading properties...
           </div>
         </div>
@@ -45,13 +48,7 @@ export function PropertyListPage() {
   if (error) {
     return (
       <section aria-live="assertive">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Properties</h1>
-          <Link to="/admin/properties/new" className="btn btn-primary">
-            Add Property
-          </Link>
-        </div>
-
+        <PageHeader title="Properties" action={addPropertyCTA} />
         <div className="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2">
           <span>{error}</span>
           <button
@@ -71,36 +68,24 @@ export function PropertyListPage() {
   if (properties.length === 0) {
     return (
       <section>
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">Properties</h1>
-          <Link to="/admin/properties/new" className="btn btn-primary">
-            Add Property
-          </Link>
-        </div>
-
-        <div className="card shadow-sm">
-          <div className="card-body py-5 text-center">
-            <h2 className="h6 mb-2">No properties yet</h2>
-            <p className="text-muted mb-4">
-              Create your first property to start your operational setup.
-            </p>
+        <PageHeader title="Properties" action={addPropertyCTA} />
+        <EmptyState
+          icon="bi-house"
+          title="No properties yet"
+          message="Create your first property to start your operational setup."
+          action={
             <Link to="/admin/properties/new" className="btn btn-primary">
               Create first property
             </Link>
-          </div>
-        </div>
+          }
+        />
       </section>
     );
   }
 
   return (
     <section>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="h4 mb-0">Properties</h1>
-        <Link to="/admin/properties/new" className="btn btn-primary">
-          Add Property
-        </Link>
-      </div>
+      <PageHeader title="Properties" action={addPropertyCTA} />
 
       {successMessage && (
         <div className="alert alert-success" role="status">
@@ -112,21 +97,26 @@ export function PropertyListPage() {
            Cards replace the horizontal table to avoid scroll on small screens. */}
       <div className="d-block d-md-none">
         {properties.map((property) => (
-          <div key={property.id} className="card mb-3 shadow-sm">
+          <div key={property.id} className="ro-task-card">
             <div className="card-body">
               {/* Row 1: property name + status badge */}
               <div className="d-flex justify-content-between align-items-center mb-1">
-                <span className="fw-semibold">{property.name}</span>
                 <span
-                  className={`badge ${
-                    property.active ? "text-bg-success" : "text-bg-secondary"
-                  }`}
+                  className="fw-semibold"
+                  style={{ color: "var(--ro-text)" }}
                 >
-                  {property.active ? "ACTIVE" : "INACTIVE"}
+                  {property.name}
                 </span>
+                <StatusBadge
+                  status={property.active ? "ACTIVE" : "INACTIVE"}
+                  type="property"
+                />
               </div>
               {/* Row 2: property code + city */}
-              <div className="text-muted small mb-3">
+              <div
+                className="mb-3"
+                style={{ fontSize: "0.875rem", color: "var(--ro-text-muted)" }}
+              >
                 <span className="badge text-bg-light border me-2">
                   {property.propertyCode}
                 </span>
@@ -146,10 +136,10 @@ export function PropertyListPage() {
 
       {/* ── Desktop table — visible on md and above ── */}
       <div className="d-none d-md-block">
-        <div className="card shadow-sm">
+        <div className="ro-section-panel">
           <div className="table-responsive">
             <table className="table align-middle mb-0">
-              <thead className="table-light">
+              <thead>
                 <tr>
                   <th scope="col">Code</th>
                   <th scope="col">Name</th>
@@ -163,19 +153,23 @@ export function PropertyListPage() {
               <tbody>
                 {properties.map((property) => (
                   <tr key={property.id}>
-                    <td>{property.propertyCode}</td>
-                    <td>{property.name}</td>
-                    <td>{property.city}</td>
+                    <td
+                      style={{
+                        color: "var(--ro-text-muted)",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      {property.propertyCode}
+                    </td>
+                    <td className="fw-medium">{property.name}</td>
+                    <td style={{ color: "var(--ro-text-muted)" }}>
+                      {property.city}
+                    </td>
                     <td>
-                      <span
-                        className={`badge ${
-                          property.active
-                            ? "text-bg-success"
-                            : "text-bg-secondary"
-                        }`}
-                      >
-                        {property.active ? "ACTIVE" : "INACTIVE"}
-                      </span>
+                      <StatusBadge
+                        status={property.active ? "ACTIVE" : "INACTIVE"}
+                        type="property"
+                      />
                     </td>
                     <td className="text-end">
                       <Link

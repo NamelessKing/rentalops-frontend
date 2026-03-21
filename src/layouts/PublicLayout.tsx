@@ -11,10 +11,13 @@
 import { Outlet } from "react-router-dom";
 
 export function PublicLayout() {
+  // d-flex + flex-column + min-vh-100 ensures the page fills the viewport
+  // vertically even on short content. bg is warm parchment from design tokens.
   return (
-    // d-flex + flex-column + min-vh-100 ensures the page fills the viewport
-    // vertically even on short content.
-    <div className="d-flex flex-column min-vh-100 bg-light">
+    <div
+      className="d-flex flex-column min-vh-100"
+      style={{ backgroundColor: "var(--ro-bg)" }}
+    >
       <main className="d-flex flex-grow-1 justify-content-center align-items-start align-items-md-center px-3 py-5">
         {/* The auth form will be rendered here by React Router */}
         <Outlet />

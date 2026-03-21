@@ -1,0 +1,683 @@
+/*
+ * theme.css — Bootstrap Override Layer
+ *
+ * This file maps RentalOps design tokens (defined in src/index.css)
+ * onto Bootstrap's own CSS custom properties, so every Bootstrap
+ * component (buttons, cards, forms, tables, alerts, badges, etc.)
+ * automatically uses our brand colors and aesthetics — without
+ * needing to touch individual Bootstrap classes in every component.
+ *
+ * Rule: change a token in index.css, it propagates here automatically.
+ * Only structural/component-level overrides live here.
+ */
+
+/* ── Bootstrap variable overrides ── */
+:root {
+  /* Map our primary to Bootstrap's --bs-primary */
+  --bs-primary: var(--ro-primary);
+  --bs-primary-rgb: 41, 88, 70; /* RGB of #295846 for Bootstrap's rgba() uses */
+
+  /* Page background */
+  --bs-body-bg: var(--ro-bg);
+  --bs-body-color: var(--ro-text);
+
+  /* Card surface */
+  --bs-card-bg: var(--ro-surface);
+  --bs-card-border-color: var(--ro-border);
+  --bs-card-border-radius: var(--ro-radius);
+  --bs-card-box-shadow: var(--ro-shadow-sm);
+
+  /* Border */
+  --bs-border-color: var(--ro-border);
+  --bs-border-radius: var(--ro-radius-sm);
+  --bs-border-radius-lg: var(--ro-radius);
+
+  /* Typography */
+  --bs-body-font-family: var(--ro-font-sans);
+  --bs-font-sans-serif: var(--ro-font-sans);
+
+  /* Semantic colors */
+  --bs-success: var(--ro-success);
+  --bs-success-rgb: 63, 122, 95;
+  --bs-warning: var(--ro-warning);
+  --bs-warning-rgb: 176, 122, 43;
+  --bs-danger: var(--ro-danger);
+  --bs-danger-rgb: 165, 72, 63;
+
+  /* Muted text */
+  --bs-secondary-color: var(--ro-text-muted);
+
+  /* Link */
+  --bs-link-color: var(--ro-primary);
+  --bs-link-hover-color: var(--ro-primary-hover);
+}
+
+/* ── btn-primary: solid, authoritative, brand-green ── */
+/* Override Bootstrap's generated btn-primary styles with our tokens */
+.btn-primary {
+  background-color: var(--ro-primary);
+  border-color: var(--ro-primary);
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background-color: var(--ro-primary-hover);
+  border-color: var(--ro-primary-hover);
+  color: #ffffff;
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  background-color: var(--ro-primary);
+  border-color: var(--ro-primary);
+  opacity: 0.55;
+}
+
+.btn-primary:active,
+.btn-primary:focus {
+  background-color: var(--ro-primary-hover) !important;
+  border-color: var(--ro-primary-hover) !important;
+  box-shadow: 0 0 0 0.25rem rgba(41, 88, 70, 0.25) !important;
+}
+
+/* ── btn-outline-primary: uses brand green border ── */
+.btn-outline-primary {
+  color: var(--ro-primary);
+  border-color: var(--ro-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--ro-primary);
+  border-color: var(--ro-primary);
+  color: #ffffff;
+}
+
+/* ── btn-outline-danger: uses brand red ── */
+.btn-outline-danger {
+  color: var(--ro-danger);
+  border-color: var(--ro-danger);
+}
+.btn-outline-danger:hover {
+  background-color: var(--ro-danger);
+  border-color: var(--ro-danger);
+  color: #ffffff;
+}
+
+/* ── btn-outline-success ── */
+.btn-outline-success {
+  color: var(--ro-success);
+  border-color: var(--ro-success);
+}
+.btn-outline-success:hover {
+  background-color: var(--ro-success);
+  border-color: var(--ro-success);
+  color: #ffffff;
+}
+
+/* ── btn-success ── */
+.btn-success {
+  background-color: var(--ro-success);
+  border-color: var(--ro-success);
+  color: #ffffff;
+  font-weight: 500;
+}
+.btn-success:hover,
+.btn-success:focus-visible {
+  background-color: #356a52;
+  border-color: #356a52;
+  color: #ffffff;
+}
+.btn-success:active,
+.btn-success:focus {
+  box-shadow: 0 0 0 0.25rem rgba(63, 122, 95, 0.25) !important;
+}
+
+/* ── All buttons: taller touch targets, consistent radius ── */
+/* Min 40px height is a UI best practice for touch-friendly interfaces */
+.btn {
+  min-height: 40px;
+  border-radius: var(--ro-radius-sm);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-sm {
+  min-height: 32px;
+  font-size: 0.8125rem;
+}
+
+/* ── Form controls: taller, spacious, warm border ── */
+/* 44px minimum height improves touch accuracy on mobile */
+.form-control,
+.form-select {
+  min-height: 44px;
+  border-color: var(--ro-border);
+  border-radius: var(--ro-radius-sm);
+  background-color: var(--ro-surface);
+  color: var(--ro-text);
+  font-size: 0.9375rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ro-primary);
+  box-shadow: 0 0 0 0.2rem rgba(41, 88, 70, 0.18);
+  background-color: var(--ro-surface);
+  color: var(--ro-text);
+}
+
+.form-control::placeholder {
+  color: var(--ro-text-muted);
+  opacity: 0.7;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--ro-danger);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+  box-shadow: 0 0 0 0.2rem rgba(165, 72, 63, 0.18);
+}
+
+/* ── Form labels: slightly stronger weight ── */
+.form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--ro-text);
+  margin-bottom: 0.35rem;
+}
+
+/* ── Form text (helper text): warm muted ── */
+.form-text {
+  color: var(--ro-text-muted);
+  font-size: 0.8125rem;
+}
+
+/* ── Invalid feedback ── */
+.invalid-feedback {
+  color: var(--ro-danger);
+  font-size: 0.8125rem;
+}
+
+/* ── Card: warm surface, subtle border, no heavy shadow ── */
+.card {
+  background-color: var(--ro-surface);
+  border: 1px solid var(--ro-border);
+  border-radius: var(--ro-radius);
+  box-shadow: var(--ro-shadow-sm);
+}
+
+/* Retain shadow-sm as a helpful modifier class but use our value */
+.card.shadow-sm,
+.shadow-sm {
+  box-shadow: var(--ro-shadow-sm) !important;
+}
+
+/* ── Table: cleaner, more readable ── */
+.table {
+  color: var(--ro-text);
+  border-color: var(--ro-border);
+  font-size: 0.9rem;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.75rem 1rem;
+  border-bottom-color: var(--ro-border);
+}
+
+/* Table header: use surface bg instead of Bootstrap's table-light grey */
+.table thead th,
+.table > thead > tr > th {
+  background-color: var(--ro-bg);
+  color: var(--ro-text-muted);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--ro-border);
+}
+
+/* Hover row highlight: warm primary tint, not Bootstrap's cold grey */
+.table-hover > tbody > tr:hover > * {
+  background-color: rgba(41, 88, 70, 0.04);
+  cursor: pointer;
+}
+
+/* Remove redundant table-light class styling (we override it above) */
+.table-light > * > * {
+  background-color: transparent;
+}
+
+/* ── Alert: left-border accent pattern instead of background flood ── */
+.alert {
+  border-radius: var(--ro-radius-sm);
+  border-left-width: 4px;
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+}
+
+.alert-success {
+  background-color: var(--ro-success-bg);
+  border-color: var(--ro-success);
+  color: var(--ro-success);
+}
+
+.alert-danger {
+  background-color: var(--ro-danger-bg);
+  border-color: var(--ro-danger);
+  color: var(--ro-danger);
+}
+
+.alert-warning {
+  background-color: var(--ro-warning-bg);
+  border-color: var(--ro-warning);
+  color: var(--ro-warning);
+}
+
+/* ── Badges: compact, pill-shaped, correct semantic colors ── */
+.badge {
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.3em 0.65em;
+  border-radius: 20px; /* pill shape */
+  letter-spacing: 0.02em;
+}
+
+/* Semantic badge colors using our palette */
+.text-bg-success {
+  background-color: var(--ro-success-bg) !important;
+  color: var(--ro-success) !important;
+}
+
+.text-bg-secondary {
+  background-color: rgba(107, 106, 99, 0.12) !important;
+  color: var(--ro-text-muted) !important;
+}
+
+.text-bg-light {
+  background-color: var(--ro-bg) !important;
+  color: var(--ro-text-muted) !important;
+  border-color: var(--ro-border) !important;
+}
+
+/* ── Navbar: light surface with bottom border (both admin & operator) ── */
+/* The actual role-specific colors are set via .ro-admin-nav and .ro-operator-nav */
+.navbar {
+  border-bottom: 1px solid var(--ro-border);
+  min-height: 56px;
+}
+
+/* ── Spinner colors ── */
+.spinner-border {
+  color: var(--ro-primary);
+}
+
+/* ── Definition list rows in detail pages ── */
+.dl-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.25rem 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--ro-border);
+}
+.dl-row:last-child {
+  border-bottom: none;
+}
+.dl-row dt {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ro-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-top: 0.125rem;
+}
+.dl-row dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--ro-text);
+  word-break: break-word;
+}
+
+/* ── Page-level layout helpers ── */
+
+/* Consistent vertical padding for page content areas */
+.ro-page-content {
+  padding-top: 1.75rem;
+  padding-bottom: 2.5rem;
+}
+
+/* Page header block: title + optional actions row */
+.ro-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ro-page-header .ro-page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ro-text);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.ro-page-header .ro-page-subtitle {
+  font-size: 0.875rem;
+  color: var(--ro-text-muted);
+  margin: 0.2rem 0 0;
+}
+
+/* ── Admin navbar custom class ── */
+.ro-admin-nav {
+  background-color: var(--ro-surface) !important;
+  border-bottom: 1px solid var(--ro-border) !important;
+}
+
+.ro-admin-nav .navbar-brand {
+  color: var(--ro-primary) !important;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.ro-admin-nav .nav-link {
+  color: var(--ro-text-muted) !important;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--ro-radius-sm);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.ro-admin-nav .nav-link:hover {
+  color: var(--ro-text) !important;
+  background-color: rgba(41, 88, 70, 0.06);
+}
+
+.ro-admin-nav .nav-link.active {
+  color: var(--ro-primary) !important;
+  font-weight: 600;
+}
+
+.ro-admin-nav .navbar-toggler {
+  border-color: var(--ro-border);
+  color: var(--ro-text);
+}
+
+.ro-admin-nav .navbar-toggler-icon {
+  /* Use a dark toggler icon since background is light */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(31,31,26,0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* User avatar circle in admin nav */
+.ro-nav-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--ro-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Operator navbar custom class ── */
+.ro-operator-nav {
+  background-color: var(--ro-operator-accent) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.ro-operator-nav .navbar-brand {
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.ro-operator-nav .nav-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--ro-radius-sm);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.ro-operator-nav .nav-link:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.ro-operator-nav .nav-link.active {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.18);
+  font-weight: 600;
+}
+
+.ro-operator-nav .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Role chip shown next to operator name in navbar */
+.ro-role-chip {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.2em 0.6em;
+  border-radius: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ── Empty state component ── */
+.ro-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background-color: var(--ro-surface);
+  border: 1px solid var(--ro-border);
+  border-radius: var(--ro-radius);
+}
+
+.ro-empty-state .ro-empty-icon {
+  font-size: 2.5rem;
+  color: var(--ro-border);
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+.ro-empty-state .ro-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ro-text);
+  margin-bottom: 0.4rem;
+}
+
+.ro-empty-state .ro-empty-message {
+  font-size: 0.875rem;
+  color: var(--ro-text-muted);
+  max-width: 360px;
+  margin: 0 auto 1.25rem;
+}
+
+/* ── Auth / public page layout ── */
+.ro-auth-wrapper {
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.ro-auth-wrapper--wide {
+  max-width: 520px;
+}
+
+/* Brand wordmark shown above auth forms */
+.ro-auth-brand {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.ro-auth-brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ro-primary);
+  letter-spacing: -0.02em;
+}
+
+.ro-auth-brand-tagline {
+  font-size: 0.8rem;
+  color: var(--ro-text-muted);
+  margin-top: 0.15rem;
+}
+
+/* Auth card: slightly more generous padding */
+.ro-auth-card {
+  background-color: var(--ro-surface);
+  border: 1px solid var(--ro-border);
+  border-radius: var(--ro-radius-lg);
+  box-shadow: var(--ro-shadow);
+  padding: 2rem;
+}
+
+@media (min-width: 480px) {
+  .ro-auth-card {
+    padding: 2.5rem;
+  }
+}
+
+/* ── Task / operator cards in list views ── */
+.ro-task-card {
+  background-color: var(--ro-surface);
+  border: 1px solid var(--ro-border);
+  border-radius: var(--ro-radius);
+  box-shadow: var(--ro-shadow-sm);
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+  margin-bottom: 0.75rem;
+}
+
+.ro-task-card:hover {
+  box-shadow: var(--ro-shadow);
+  border-color: #c9c3ba;
+}
+
+.ro-task-card .card-body {
+  padding: 1rem 1.1rem 0.75rem;
+}
+
+.ro-task-card .card-footer {
+  background-color: transparent;
+  border-top: 1px solid var(--ro-border);
+  padding: 0.65rem 1.1rem;
+}
+
+.ro-task-card .ro-card-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ro-text);
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+}
+
+.ro-task-card .ro-card-meta {
+  font-size: 0.8125rem;
+  color: var(--ro-text-muted);
+  line-height: 1.5;
+}
+
+/* ── Priority badge colors using design tokens ── */
+.ro-badge-low {
+  background-color: rgba(63, 122, 95, 0.12) !important;
+  color: var(--ro-success) !important;
+}
+.ro-badge-medium {
+  background-color: rgba(41, 88, 70, 0.1) !important;
+  color: var(--ro-primary) !important;
+}
+.ro-badge-high {
+  background-color: var(--ro-warning-bg) !important;
+  color: var(--ro-warning) !important;
+}
+.ro-badge-critical {
+  background-color: var(--ro-danger-bg) !important;
+  color: var(--ro-danger) !important;
+}
+
+/* ── Status badge colors using design tokens ── */
+.ro-badge-pending {
+  background-color: rgba(107, 106, 99, 0.12) !important;
+  color: var(--ro-text-muted) !important;
+}
+.ro-badge-assigned {
+  background-color: rgba(54, 95, 115, 0.12) !important;
+  color: var(--ro-admin-accent) !important;
+}
+.ro-badge-in-progress {
+  background-color: var(--ro-warning-bg) !important;
+  color: var(--ro-warning) !important;
+}
+.ro-badge-completed {
+  background-color: var(--ro-success-bg) !important;
+  color: var(--ro-success) !important;
+}
+
+/* ── Section panel: lightly-bounded group on a page ── */
+.ro-section-panel {
+  background-color: var(--ro-surface);
+  border: 1px solid var(--ro-border);
+  border-radius: var(--ro-radius);
+  overflow: hidden;
+}
+
+.ro-section-panel-header {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--ro-border);
+  background-color: var(--ro-bg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ro-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Form card wrapper: used on create/edit pages ── */
+.ro-form-card {
+  background-color: var(--ro-surface);
+  border: 1px solid var(--ro-border);
+  border-radius: var(--ro-radius);
+  box-shadow: var(--ro-shadow-sm);
+  padding: 1.5rem;
+  max-width: 640px;
+}
+
+@media (min-width: 640px) {
+  .ro-form-card {
+    padding: 2rem;
+  }
+}

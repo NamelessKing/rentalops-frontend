@@ -80,13 +80,9 @@ export function OperatorMyTasksPage() {
   if (loading) {
     return (
       <section aria-live="polite">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="h4 mb-0">My Tasks</h1>
-        </div>
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            Loading your tasks…
-          </div>
+        <h1 className="h4 mb-3">My Tasks</h1>
+        <div className="ro-task-card text-center text-muted py-4">
+          Loading your tasks…
         </div>
       </section>
     );
@@ -117,6 +113,7 @@ export function OperatorMyTasksPage() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="h4 mb-0">My Tasks</h1>
         <Link to="/operator/pool" className="btn btn-outline-primary btn-sm">
+          <i className="bi bi-search me-1" aria-hidden="true" />
           Browse Pool
         </Link>
       </div>
@@ -138,11 +135,14 @@ export function OperatorMyTasksPage() {
       )}
 
       {tasks.length === 0 ? (
-        <div className="card shadow-sm">
-          <div className="card-body py-4 text-center text-muted">
-            No tasks assigned yet.{" "}
-            <Link to="/operator/pool">Check the task pool.</Link>
-          </div>
+        // ro-empty-state: centered column with icon for zero-data screens.
+        <div className="ro-empty-state">
+          <i className="bi bi-clipboard-check" aria-hidden="true" />
+          <strong>No tasks assigned yet.</strong>
+          <p className="mb-0 small">
+            <Link to="/operator/pool">Browse the task pool</Link> to claim a
+            task.
+          </p>
         </div>
       ) : (
         // Card stack — one card per task, works on any screen width.
@@ -154,7 +154,7 @@ export function OperatorMyTasksPage() {
             const isActing = actingId === task.id;
 
             return (
-              <div key={task.id} className="card shadow-sm">
+              <div key={task.id} className="ro-task-card">
                 {/* Tappable body — navigates to the task detail page. */}
                 <div
                   className="card-body"
@@ -186,7 +186,18 @@ export function OperatorMyTasksPage() {
                       disabled={isActing}
                       onClick={() => void handleStart(task.id)}
                     >
-                      {isActing ? "Starting…" : "Start Task"}
+                      {isActing ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          />
+                          Starting…
+                        </>
+                      ) : (
+                        "Start Task"
+                      )}
                     </button>
                   </div>
                 )}
@@ -202,7 +213,18 @@ export function OperatorMyTasksPage() {
                       disabled={isActing}
                       onClick={() => void handleComplete(task.id)}
                     >
-                      {isActing ? "Completing…" : "Mark Complete"}
+                      {isActing ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          />
+                          Completing…
+                        </>
+                      ) : (
+                        "Mark Complete"
+                      )}
                     </button>
                   </div>
                 )}

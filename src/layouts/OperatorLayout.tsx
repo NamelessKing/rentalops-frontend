@@ -27,9 +27,13 @@ export function OperatorLayout() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      {/* ── Top navigation bar (darker shade to visually distinguish from Admin) ── */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-secondary px-3">
-        <span className="navbar-brand fw-bold">RentalOps</span>
+      {/* ── Top navigation bar (operator accent color to visually distinguish from Admin) ── */}
+      <nav className="navbar navbar-expand-lg ro-operator-nav px-3">
+        <span className="navbar-brand fw-bold">
+          RentalOps
+          {/* Role chip: small pill that shows the user's context */}
+          <span className="ro-role-chip ms-2">Operator</span>
+        </span>
 
         {/* Mobile toggle — important because operators often use phones */}
         <button
@@ -79,9 +83,15 @@ export function OperatorLayout() {
           </ul>
 
           <div className="d-flex align-items-center gap-3">
-            <span className="text-light small">{user?.fullName}</span>
+            <span className="small" style={{ color: "rgba(255,255,255,0.85)" }}>
+              {user?.fullName}
+            </span>
             <button
-              className="btn btn-outline-light btn-sm"
+              className="btn btn-sm"
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                border: "1px solid rgba(255,255,255,0.35)",
+              }}
               onClick={() => {
                 closeMenu();
                 logout();

@@ -1,4 +1,10 @@
 /* Global styles — RentalOps Frontend */
 
-/* Bootstrap */
-@import 'bootstrap/dist/css/bootstrap.min.css';
+/* 1. Bootstrap base — provides grid, utilities and component structure */
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+/* 2. Bootstrap Icons — pure CSS icon font used in navbar, CTAs and empty states */
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+/* 3. Theme — maps design tokens onto Bootstrap variables and adds RO component styles */
+@import "./theme.css";

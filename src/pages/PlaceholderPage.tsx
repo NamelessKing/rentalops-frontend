@@ -11,17 +11,21 @@
 //   One reusable stub avoids creating 15+ empty files that would be
 //   immediately replaced in the next slice.
 
+import { EmptyState } from "@/shared/components/EmptyState";
+
 interface PlaceholderPageProps {
   // Name of the future page — shown in the heading so it is clear
   // which route matched during manual testing.
   title: string;
 }
 
+// Uses EmptyState to keep the "coming soon" UI consistent with other empty screens.
 export function PlaceholderPage({ title }: PlaceholderPageProps) {
   return (
-    <div className="py-5 text-center text-muted">
-      <h2>{title}</h2>
-      <p className="small">This page will be implemented in a future slice.</p>
-    </div>
+    <EmptyState
+      icon="bi-tools"
+      title={title}
+      message="This page will be implemented in a future slice."
+    />
   );
 }
