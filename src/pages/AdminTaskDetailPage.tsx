@@ -115,12 +115,14 @@ export function AdminTaskDetailPage() {
             </div>
           )}
 
-          {/* sourceIssueReportId will link to the issue report page when that feature is available. */}
+          {/* Link to the source issue report — now that the detail route exists. */}
           {task.sourceIssueReportId && (
             <div className="dl-row">
               <dt>From issue report</dt>
               <dd>
-                <code>{task.sourceIssueReportId}</code>
+                <Link to={`/admin/issue-reports/${task.sourceIssueReportId}`}>
+                  View source report
+                </Link>
               </dd>
             </div>
           )}

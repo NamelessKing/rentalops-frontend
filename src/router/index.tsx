@@ -56,6 +56,9 @@ import { AdminTaskDetailPage } from "@/pages/AdminTaskDetailPage";
 import { OperatorMyTasksPage } from "@/pages/OperatorMyTasksPage";
 import { OperatorTaskDetailPage } from "@/pages/OperatorTaskDetailPage";
 import { OperatorPoolPage } from "@/pages/OperatorPoolPage";
+import { CreateIssueReportPage } from "@/pages/CreateIssueReportPage";
+import { IssueReportListAdminPage } from "@/pages/IssueReportListAdminPage";
+import { IssueReportDetailAdminPage } from "@/pages/IssueReportDetailAdminPage";
 
 export function AppRouter() {
   return (
@@ -108,11 +111,11 @@ export function AppRouter() {
             />
             <Route
               path="/admin/issue-reports"
-              element={<PlaceholderPage title="Issue Reports" />}
+              element={<IssueReportListAdminPage />}
             />
             <Route
               path="/admin/issue-reports/:issueReportId/convert"
-              element={<PlaceholderPage title="Convert Issue Report" />}
+              element={<IssueReportDetailAdminPage />}
             />
           </Route>
         </Route>
@@ -130,7 +133,7 @@ export function AppRouter() {
             <Route path="/operator/pool" element={<OperatorPoolPage />} />
             <Route
               path="/operator/issue-reports/new"
-              element={<PlaceholderPage title="Create Issue Report" />}
+              element={<CreateIssueReportPage />}
             />
           </Route>
         </Route>

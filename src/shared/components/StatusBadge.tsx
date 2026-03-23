@@ -38,9 +38,19 @@ const PROPERTY_STATUS: Record<string, StatusConfig> = {
   INACTIVE: { className: "ro-badge-pending", label: "Inattiva" },
 };
 
+// ── Issue report status mapping ──
+// OPEN      → yellow (waiting for Admin review)
+// CONVERTED → green (turned into a task)
+// DISMISSED → muted grey (archived without action)
+const ISSUE_REPORT_STATUS: Record<string, StatusConfig> = {
+  OPEN: { className: "ro-badge-pending", label: "Aperta" },
+  CONVERTED: { className: "ro-badge-completed", label: "Convertita in task" },
+  DISMISSED: { className: "ro-badge-dismissed", label: "Archiviata" },
+};
+
 // The type prop controls which mapping table to use.
 // Defaults to 'task' if not provided.
-type StatusType = "task" | "operator" | "property";
+type StatusType = "task" | "operator" | "property" | "issueReport";
 
 interface StatusBadgeProps {
   status: string;
@@ -54,7 +64,9 @@ function resolveConfig(type: StatusType, status: string): StatusConfig {
       ? OPERATOR_STATUS
       : type === "property"
         ? PROPERTY_STATUS
-        : TASK_STATUS;
+        : type === "issueReport"
+          ? ISSUE_REPORT_STATUS
+          : TASK_STATUS;
 
   // Fall back to a neutral badge if an unknown status value is passed.
   return map[status] ?? { className: "ro-badge-pending", label: status };

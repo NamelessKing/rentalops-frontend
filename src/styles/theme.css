@@ -646,6 +646,12 @@
   background-color: var(--ro-success-bg) !important;
   color: var(--ro-success) !important;
 }
+/* DISMISSED issue reports — neutral muted grey, no action implied */
+.ro-badge-dismissed {
+  background-color: rgba(107, 106, 99, 0.08) !important;
+  color: var(--ro-text-muted) !important;
+  font-style: italic;
+}
 
 /* ── Section panel: lightly-bounded group on a page ── */
 .ro-section-panel {
