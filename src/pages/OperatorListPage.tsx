@@ -61,15 +61,81 @@ export function OperatorListPage() {
   );
 
   if (loading) {
+    // Skeleton mirrors the real layout (mobile cards + desktop table) so the page
+    // doesn't visually jump when data arrives. Both breakpoints are covered separately,
+    // matching the structure of the success state below.
     return (
       <section aria-live="polite">
         <PageHeader title="Team" action={addOperatorCTA} />
-        <div className="ro-section-panel">
-          <div
-            className="p-4 text-center"
-            style={{ color: "var(--ro-text-muted)" }}
-          >
-            Loading operators...
+
+        {/* ── Mobile skeleton — visible on xs/sm ── */}
+        <div className="d-block d-md-none">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="ro-task-card">
+              <div className="card-body">
+                {/* Row 1: name placeholder + badge placeholder */}
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="placeholder-glow" style={{ width: "55%" }}>
+                    <span className="placeholder col-12" />
+                  </span>
+                  <span className="placeholder-glow" style={{ width: "22%" }}>
+                    <span className="placeholder col-12 rounded-pill" />
+                  </span>
+                </div>
+                {/* Row 2: email placeholder */}
+                <div className="placeholder-glow mb-2">
+                  <span className="placeholder col-8" />
+                </div>
+                {/* Row 3: category badge placeholder */}
+                <div className="placeholder-glow mb-3">
+                  <span className="placeholder col-4" />
+                </div>
+                {/* Row 4: action buttons placeholder — d-grid matches the real layout */}
+                <div className="d-grid gap-2 placeholder-glow">
+                  <span className="placeholder btn col-12" />
+                  <span className="placeholder btn col-12" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Desktop skeleton — visible on md and above ── */}
+        <div className="d-none d-md-block">
+          <div className="ro-section-panel">
+            <div className="table-responsive">
+              {/* Real thead so column widths match the loaded table */}
+              <table className="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Varying placeholder widths so the skeleton looks natural */}
+                  {[
+                    ["col-7", "col-9", "col-6", "col-5", "col-6"],
+                    ["col-5", "col-8", "col-7", "col-4", "col-5"],
+                    ["col-8", "col-7", "col-5", "col-5", "col-6"],
+                    ["col-6", "col-9", "col-6", "col-4", "col-5"],
+                  ].map((cols, rowIdx) => (
+                    <tr key={rowIdx}>
+                      {cols.map((w, colIdx) => (
+                        <td key={colIdx}>
+                          <span className="placeholder-glow d-block">
+                            <span className={`placeholder ${w}`} />
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

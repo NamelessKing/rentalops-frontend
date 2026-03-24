@@ -17,6 +17,7 @@
 //   - Card stack on mobile (always readable)
 //   - Table on medium+ viewports (density for admins at a desk)
 
+import React from "react";
 import { Link } from "react-router-dom";
 import { useIssueReportList } from "@/features/issueReports/hooks/useIssueReportList";
 import { StatusBadge } from "@/shared/components/StatusBadge";
@@ -25,10 +26,12 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import type { IssueReportListItem } from "@/features/issueReports/types";
 
 // Formats an ISO 8601 datetime string into a concise locale string.
-// The backend returns "2026-03-21T10:00:00" — we add "Z" so the browser
-// interprets it as UTC and converts to the local timezone.
+// Supports both legacy timezone-less values and the newer UTC values with "Z".
+// This avoids generating invalid timestamps like "...ZZ" during the migration window.
 function formatDate(iso: string): string {
-  return new Date(iso + "Z").toLocaleString(undefined, {
+  const normalizedIso = /(?:Z|[+-]\d{2}:\d{2})$/i.test(iso) ? iso : `${iso}Z`;
+
+  return new Date(normalizedIso).toLocaleString(undefined, {
     dateStyle: "short",
     timeStyle: "short",
   });
@@ -124,10 +127,10 @@ export function IssueReportListAdminPage() {
           </thead>
           <tbody>
             {reports.map((r) => (
-              // We use a fragment so we can add an optional error row below
-              // the main row without breaking the table structure.
-              <>
-                <tr key={r.id}>
+              // React.Fragment (long-form) is required here because the key prop
+              // must sit on the outermost element, and <> shorthand cannot carry props.
+              <React.Fragment key={r.id}>
+                <tr>
                   <td className="align-middle fw-medium">{r.propertyName}</td>
                   <td className="align-middle text-muted small">
                     {r.reportedByUserName}
@@ -197,7 +200,7 @@ export function IssueReportListAdminPage() {
                 </tr>
                 {/* Inline error row — only visible when a dismiss for this row failed. */}
                 {rowErrors[r.id] && (
-                  <tr key={`${r.id}-error`}>
+                  <tr>
                     <td
                       colSpan={6}
                       className="pt-0 pb-1 border-top-0 text-danger small"
@@ -210,7 +213,7 @@ export function IssueReportListAdminPage() {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

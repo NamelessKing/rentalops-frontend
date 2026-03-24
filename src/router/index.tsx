@@ -41,7 +41,6 @@ import { AdminLayout } from "@/layouts/AdminLayout";
 import { OperatorLayout } from "@/layouts/OperatorLayout";
 import { RequireAuth } from "./RequireAuth";
 import { RequireRole } from "./RequireRole";
-import { PlaceholderPage } from "@/pages/PlaceholderPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { OperatorListPage } from "@/pages/OperatorListPage";
@@ -59,6 +58,7 @@ import { OperatorPoolPage } from "@/pages/OperatorPoolPage";
 import { CreateIssueReportPage } from "@/pages/CreateIssueReportPage";
 import { IssueReportListAdminPage } from "@/pages/IssueReportListAdminPage";
 import { IssueReportDetailAdminPage } from "@/pages/IssueReportDetailAdminPage";
+import { AdminDashboardPage } from "@/pages/AdminDashboardPage";
 
 export function AppRouter() {
   return (
@@ -81,10 +81,7 @@ export function AppRouter() {
       <Route element={<RequireAuth />}>
         <Route element={<RequireRole role="ADMIN" />}>
           <Route element={<AdminLayout />}>
-            <Route
-              path="/admin/dashboard"
-              element={<PlaceholderPage title="Admin Dashboard" />}
-            />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="/admin/operators" element={<OperatorListPage />} />
             <Route
               path="/admin/operators/new"
