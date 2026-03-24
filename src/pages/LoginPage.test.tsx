@@ -65,7 +65,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "secret123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Login" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(mockLoginRequest).toHaveBeenCalledWith({
@@ -93,7 +93,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "wrong-password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Login" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(
@@ -119,7 +119,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "secret123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Login" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
       expect(

@@ -23,4 +23,6 @@ docs
 *.njsproj
 *.sln
 *.sw?
-.github
+.github/*
+!.github/workflows/
+!.github/workflows/**
