@@ -7,8 +7,12 @@
 
 import { Link } from "react-router-dom";
 import { useAdminSummary } from "@/features/dashboard/hooks/useAdminSummary";
+import { useTeamHealth } from "@/features/dashboard/hooks/useTeamHealth";
+import { useRecentOpenIssueReports } from "@/features/dashboard/hooks/useRecentOpenIssueReports";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { EmptyState } from "@/shared/components/EmptyState";
+
+const ATTENTION_PENDING_BACKLOG_THRESHOLD = 5;
 
 interface StatCardProps {
   label: string;
@@ -23,6 +27,32 @@ interface StatCardProps {
   // to avoid a visual "border inside border" effect. Styled with the page background
   // tint so nested cells still stand out from the panel surface.
   flat?: boolean;
+}
+
+interface AttentionSignal {
+  key:
+    | "open-issue-reports"
+    | "no-active-operators"
+    | "no-properties"
+    | "task-backlog";
+  title: string;
+  message: string;
+  ctaLabel: string;
+  to: string;
+  accent: string;
+}
+
+interface QuickAction {
+  key:
+    | "create-property"
+    | "create-operator"
+    | "view-team"
+    | "view-issue-reports"
+    | "view-tasks"
+    | "create-task";
+  label: string;
+  to: string;
+  icon: string;
 }
 
 // Small reusable KPI card. Optional icon and accent colour give visual hierarchy
@@ -121,12 +151,29 @@ function getEmptyStateModel(propertiesCount: number, operatorsCount: number) {
 // Renders the Admin dashboard states: loading, error, empty, and success.
 export function AdminDashboardPage() {
   const { data, loading, error, reload } = useAdminSummary();
+  const {
+    data: teamHealth,
+    loading: teamHealthLoading,
+    error: teamHealthError,
+    reload: reloadTeamHealth,
+  } = useTeamHealth();
+  const {
+    data: recentOpenReports,
+    loading: recentOpenReportsLoading,
+    error: recentOpenReportsError,
+    reload: reloadRecentOpenReports,
+  } = useRecentOpenIssueReports();
+
+  // Keep dashboard sections aligned by refreshing both data blocks from one action.
+  const handleRefresh = () => {
+    void Promise.all([reload(), reloadTeamHealth(), reloadRecentOpenReports()]);
+  };
 
   const refreshAction = (
     <button
       type="button"
       className="btn btn-outline-secondary"
-      onClick={() => void reload()}
+      onClick={handleRefresh}
     >
       <i className="bi bi-arrow-clockwise me-2" aria-hidden="true" />
       Refresh
@@ -308,6 +355,390 @@ export function AdminDashboardPage() {
     );
   }
 
+  // Keep Team Health state handling local to this panel so summary cards remain usable
+  // even if the operators call fails independently.
+  let teamHealthContent: React.ReactNode;
+
+  if (teamHealthLoading) {
+    teamHealthContent = (
+      <div className="row g-2">
+        {["col-4", "col-4", "col-5", "col-4", "col-4", "col-6"].map((w, i) => (
+          <div className="col-6 col-md-4" key={i}>
+            <div
+              className="p-2 rounded"
+              style={{ backgroundColor: "var(--ro-bg)" }}
+            >
+              <div className="placeholder-glow mb-1">
+                <span className={`placeholder ${w}`} />
+              </div>
+              <div className="placeholder-glow">
+                <span className="placeholder col-3" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else if (teamHealthError) {
+    teamHealthContent = (
+      <div className="alert alert-danger mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <span>{teamHealthError}</span>
+        <button
+          type="button"
+          className="btn btn-outline-danger btn-sm"
+          onClick={() => void reloadTeamHealth()}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  } else if (!teamHealth) {
+    teamHealthContent = (
+      <div className="alert alert-warning mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <span>Team health data is currently unavailable.</span>
+        <button
+          type="button"
+          className="btn btn-outline-warning btn-sm"
+          onClick={() => void reloadTeamHealth()}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  } else if (teamHealth.activeOperators + teamHealth.disabledOperators === 0) {
+    teamHealthContent = (
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <p className="mb-0" style={{ color: "var(--ro-text-muted)" }}>
+          No operators found yet.
+        </p>
+        <Link
+          to="/admin/operators/new"
+          className="btn btn-outline-secondary btn-sm"
+        >
+          Create Operator
+        </Link>
+      </div>
+    );
+  } else {
+    teamHealthContent = (
+      <>
+        <div className="row g-2 mb-3">
+          <div className="col-6">
+            <StatCard
+              label="Active Operators"
+              value={teamHealth.activeOperators}
+              icon="bi-person-check"
+              accent="var(--ro-success)"
+              flat
+            />
+          </div>
+          <div className="col-6">
+            <StatCard
+              label="Disabled Operators"
+              value={teamHealth.disabledOperators}
+              icon="bi-person-x"
+              accent="var(--ro-danger)"
+              flat
+            />
+          </div>
+        </div>
+
+        <p
+          className="mb-2 d-flex align-items-center gap-2"
+          style={{ color: "var(--ro-text-muted)", fontSize: "0.85rem" }}
+        >
+          <i className="bi bi-grid" aria-hidden="true" />
+          Specialization Breakdown
+        </p>
+
+        <div className="row g-2">
+          <div className="col-6 col-md-3">
+            <StatCard
+              label="CLEANING"
+              value={teamHealth.specializationBreakdown.CLEANING}
+              flat
+            />
+          </div>
+          <div className="col-6 col-md-3">
+            <StatCard
+              label="PLUMBING"
+              value={teamHealth.specializationBreakdown.PLUMBING}
+              flat
+            />
+          </div>
+          <div className="col-6 col-md-3">
+            <StatCard
+              label="ELECTRICAL"
+              value={teamHealth.specializationBreakdown.ELECTRICAL}
+              flat
+            />
+          </div>
+          <div className="col-6 col-md-3">
+            <StatCard
+              label="GENERAL_MAINTENANCE"
+              value={teamHealth.specializationBreakdown.GENERAL_MAINTENANCE}
+              flat
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  let recentOpenReportsContent: React.ReactNode;
+
+  if (recentOpenReportsLoading) {
+    recentOpenReportsContent = (
+      <div className="row g-2">
+        {[0, 1, 2].map((i) => (
+          <div className="col-12" key={i}>
+            <div
+              className="p-2 rounded"
+              style={{ backgroundColor: "var(--ro-bg)" }}
+            >
+              <div className="placeholder-glow mb-1">
+                <span className="placeholder col-4" />
+              </div>
+              <div className="placeholder-glow mb-1">
+                <span className="placeholder col-8" />
+              </div>
+              <div className="placeholder-glow">
+                <span className="placeholder col-3" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } else if (recentOpenReportsError) {
+    recentOpenReportsContent = (
+      <div className="alert alert-danger mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <span>{recentOpenReportsError}</span>
+        <button
+          type="button"
+          className="btn btn-outline-danger btn-sm"
+          onClick={() => void reloadRecentOpenReports()}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  } else if (!recentOpenReports) {
+    recentOpenReportsContent = (
+      <div className="alert alert-warning mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <span>Open issue report preview is currently unavailable.</span>
+        <button
+          type="button"
+          className="btn btn-outline-warning btn-sm"
+          onClick={() => void reloadRecentOpenReports()}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  } else if (recentOpenReports.length === 0) {
+    recentOpenReportsContent = (
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <p className="mb-0" style={{ color: "var(--ro-text-muted)" }}>
+          No open issue reports right now.
+        </p>
+        <Link
+          to="/admin/issue-reports"
+          className="btn btn-outline-secondary btn-sm"
+        >
+          View Issue Reports
+        </Link>
+      </div>
+    );
+  } else {
+    recentOpenReportsContent = (
+      <div className="d-flex flex-column gap-2">
+        {recentOpenReports.map((report) => (
+          <div
+            key={report.id}
+            className="p-2 rounded"
+            style={{ backgroundColor: "var(--ro-bg)" }}
+          >
+            <div className="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-1">
+              <p className="mb-0 fw-semibold">{report.propertyName}</p>
+              <small style={{ color: "var(--ro-text-muted)" }}>
+                {new Date(report.createdAt).toLocaleDateString()}
+              </small>
+            </div>
+
+            <p
+              className="mb-1"
+              style={{ color: "var(--ro-text-muted)", fontSize: "0.85rem" }}
+            >
+              Reported by {report.reportedByUserName}
+            </p>
+
+            <p className="mb-2" style={{ fontSize: "0.9rem" }}>
+              {report.description.length > 110
+                ? `${report.description.slice(0, 110)}...`
+                : report.description}
+            </p>
+
+            <Link
+              to={`/admin/issue-reports/${report.id}/convert`}
+              className="btn btn-outline-secondary btn-sm"
+            >
+              Review
+            </Link>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const attentionSignals: AttentionSignal[] = [];
+
+  if (data.issueReportCounts.open > 0) {
+    attentionSignals.push({
+      key: "open-issue-reports",
+      title: "Open issue reports need review",
+      message: `${data.issueReportCounts.open} open report${data.issueReportCounts.open === 1 ? "" : "s"} waiting for admin action.`,
+      ctaLabel: "Review Issue Reports",
+      to: "/admin/issue-reports",
+      accent: "var(--ro-danger)",
+    });
+  }
+
+  if (teamHealth && teamHealth.activeOperators === 0) {
+    attentionSignals.push({
+      key: "no-active-operators",
+      title: "No active operators available",
+      message: "Activate or add operators before assigning operational work.",
+      ctaLabel: "View Team",
+      to: "/admin/operators",
+      accent: "var(--ro-danger)",
+    });
+  }
+
+  if (data.propertiesCount === 0) {
+    attentionSignals.push({
+      key: "no-properties",
+      title: "No properties created yet",
+      message:
+        "Create at least one property to enable tasks and issue reports.",
+      ctaLabel: "Create Property",
+      to: "/admin/properties/new",
+      accent: "var(--ro-warning)",
+    });
+  }
+
+  if (data.taskCounts.pending >= ATTENTION_PENDING_BACKLOG_THRESHOLD) {
+    attentionSignals.push({
+      key: "task-backlog",
+      title: "Task backlog needs attention",
+      message: `${data.taskCounts.pending} pending tasks (threshold: ${ATTENTION_PENDING_BACKLOG_THRESHOLD}).`,
+      ctaLabel: "View Tasks",
+      to: "/admin/tasks",
+      accent: "var(--ro-warning)",
+    });
+  }
+
+  let attentionNeededContent: React.ReactNode;
+
+  if (attentionSignals.length === 0) {
+    attentionNeededContent = (
+      <div
+        className="d-flex align-items-center gap-2"
+        style={{ color: "var(--ro-text-muted)" }}
+      >
+        <i className="bi bi-check-circle" aria-hidden="true" />
+        <span>No immediate attention needed.</span>
+      </div>
+    );
+  } else {
+    attentionNeededContent = (
+      <div className="d-flex flex-column gap-2">
+        {attentionSignals.map((signal) => (
+          <div
+            key={signal.key}
+            className="p-2 rounded"
+            style={{
+              backgroundColor: "var(--ro-bg)",
+              borderLeft: `3px solid ${signal.accent}`,
+            }}
+          >
+            <p className="mb-1 fw-semibold">{signal.title}</p>
+            <p
+              className="mb-2"
+              style={{ color: "var(--ro-text-muted)", fontSize: "0.9rem" }}
+            >
+              {signal.message}
+            </p>
+            <Link to={signal.to} className="btn btn-outline-secondary btn-sm">
+              {signal.ctaLabel}
+            </Link>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Keep Quick Actions deterministic: one primary action based on current state,
+  // then a stable secondary list to preserve muscle memory.
+  const quickActions: QuickAction[] = [
+    {
+      key: "create-property",
+      label: "Create Property",
+      to: "/admin/properties/new",
+      icon: "bi-buildings",
+    },
+    {
+      key: "create-operator",
+      label: "Create Operator",
+      to: "/admin/operators/new",
+      icon: "bi-person-plus",
+    },
+    {
+      key: "view-team",
+      label: "View Team",
+      to: "/admin/operators",
+      icon: "bi-people",
+    },
+    {
+      key: "view-issue-reports",
+      label: "View Issue Reports",
+      to: "/admin/issue-reports",
+      icon: "bi-flag",
+    },
+    {
+      key: "view-tasks",
+      label: "View Tasks",
+      to: "/admin/tasks",
+      icon: "bi-list-task",
+    },
+    {
+      key: "create-task",
+      label: "Create Task",
+      to: "/admin/tasks/new",
+      icon: "bi-plus-lg",
+    },
+  ];
+
+  let primaryQuickActionKey: QuickAction["key"] = "create-task";
+
+  if (data.propertiesCount === 0) {
+    primaryQuickActionKey = "create-property";
+  } else if (teamHealth && teamHealth.activeOperators === 0) {
+    primaryQuickActionKey = "create-operator";
+  } else if (data.issueReportCounts.open > 0) {
+    primaryQuickActionKey = "view-issue-reports";
+  } else if (data.taskCounts.pending >= ATTENTION_PENDING_BACKLOG_THRESHOLD) {
+    primaryQuickActionKey = "view-tasks";
+  }
+
+  const primaryQuickAction =
+    quickActions.find((action) => action.key === primaryQuickActionKey) ??
+    quickActions[quickActions.length - 1];
+
+  const secondaryQuickActions = quickActions
+    .filter((action) => action.key !== primaryQuickAction.key)
+    .slice(0, 4);
+
   return (
     <section>
       <PageHeader
@@ -447,31 +878,77 @@ export function AdminDashboardPage() {
         </div>
       </div>
 
+      <div className="row g-3 mb-3">
+        <div className="col-12">
+          <div className="ro-section-panel h-100">
+            <div className="ro-section-panel-header d-flex align-items-center justify-content-between">
+              <span>Team Health</span>
+              <Link
+                to="/admin/operators"
+                className="btn btn-outline-secondary btn-sm"
+              >
+                View Team
+              </Link>
+            </div>
+
+            <div className="p-3">{teamHealthContent}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row g-3 mb-3">
+        <div className="col-12">
+          <div className="ro-section-panel h-100">
+            <div className="ro-section-panel-header d-flex align-items-center justify-content-between">
+              <span>Recent Open Issue Reports</span>
+              <Link
+                to="/admin/issue-reports"
+                className="btn btn-outline-secondary btn-sm"
+              >
+                View All
+              </Link>
+            </div>
+
+            <div className="p-3">{recentOpenReportsContent}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row g-3 mb-3">
+        <div className="col-12">
+          <div className="ro-section-panel h-100">
+            <div className="ro-section-panel-header">Attention Needed</div>
+
+            <div className="p-3">{attentionNeededContent}</div>
+          </div>
+        </div>
+      </div>
+
       <div className="ro-section-panel">
         {/* ro-section-panel-header gives the "Quick Actions" strip the same
             uppercase label treatment as the Tasks and Issue Reports panels. */}
         <div className="ro-section-panel-header">Quick Actions</div>
-        <div className="p-3 d-flex flex-wrap gap-2">
-          <Link to="/admin/operators" className="btn btn-outline-secondary">
-            <i className="bi bi-people me-2" aria-hidden="true" />
-            View Team
+        <div className="p-3 d-flex flex-column gap-2">
+          <Link to={primaryQuickAction.to} className="btn btn-primary">
+            <i
+              className={`bi ${primaryQuickAction.icon} me-2`}
+              aria-hidden="true"
+            />
+            {primaryQuickAction.label}
           </Link>
-          <Link to="/admin/properties" className="btn btn-outline-secondary">
-            <i className="bi bi-buildings me-2" aria-hidden="true" />
-            View Properties
-          </Link>
-          <Link to="/admin/tasks" className="btn btn-outline-secondary">
-            <i className="bi bi-list-task me-2" aria-hidden="true" />
-            View Tasks
-          </Link>
-          <Link to="/admin/issue-reports" className="btn btn-outline-secondary">
-            <i className="bi bi-flag me-2" aria-hidden="true" />
-            View Issue Reports
-          </Link>
-          <Link to="/admin/tasks/new" className="btn btn-primary">
-            <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-            Create Task
-          </Link>
+
+          <div className="d-flex flex-wrap gap-2">
+            {secondaryQuickActions.map((action) => (
+              <Link
+                key={action.key}
+                to={action.to}
+                className="btn btn-outline-secondary"
+              >
+                <i className={`bi ${action.icon} me-2`} aria-hidden="true" />
+                {action.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
