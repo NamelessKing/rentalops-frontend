@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useOperatorList } from "@/features/operators/hooks/useOperatorList";
+import { useOperatorsWorkloadMap } from "@/features/tasks/hooks/useOperatorsWorkloadMap";
 import {
   disableOperator,
   enableOperator,
@@ -22,11 +23,25 @@ interface OperatorListLocationState {
   successMessage?: string;
 }
 
+// Canonical specialization buckets used in team coverage checks.
+// Keeping this local avoids extra hooks or API calls for a lightweight summary strip.
+const SPECIALIZATION_CATEGORIES = [
+  "CLEANING",
+  "PLUMBING",
+  "ELECTRICAL",
+  "GENERAL_MAINTENANCE",
+] as const;
+
 export function OperatorListPage() {
   const location = useLocation();
   const successMessage = (location.state as OperatorListLocationState | null)
     ?.successMessage;
   const { data, loading, error, reload } = useOperatorList();
+  const {
+    workloadByOperatorId,
+    loading: workloadLoading,
+    error: workloadError,
+  } = useOperatorsWorkloadMap();
 
   // Tracks which row's toggle button is in flight to prevent double-clicks.
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -180,6 +195,25 @@ export function OperatorListPage() {
     );
   }
 
+  // Team summary is derived from the already-loaded list data.
+  // This keeps the strip informative without introducing extra fetches.
+  const totalOperators = operators.length;
+  const activeOperators = operators.filter((o) => o.status === "ACTIVE").length;
+  const disabledOperators = totalOperators - activeOperators;
+
+  const activeSpecializations = new Set(
+    operators
+      .filter((o) => o.status === "ACTIVE")
+      .map((o) => o.specializationCategory),
+  );
+  const specializationCoverage = `${activeSpecializations.size}/${SPECIALIZATION_CATEGORIES.length}`;
+
+  // Missing means: no ACTIVE operator exists for that specialization.
+  // This includes categories that are absent entirely and categories with only DISABLED operators.
+  const missingActiveSpecializations = SPECIALIZATION_CATEGORIES.filter(
+    (category) => !activeSpecializations.has(category),
+  );
+
   return (
     <section>
       <PageHeader title="Team" action={addOperatorCTA} />
@@ -203,6 +237,40 @@ export function OperatorListPage() {
         </div>
       )}
 
+      {/* Compact team summary strip — secondary context above the main list. */}
+      <div className="ro-section-panel mb-3" aria-label="Team summary">
+        <div className="p-3">
+          <div className="d-flex flex-wrap gap-2">
+            <span className="badge text-bg-light border">
+              Total {totalOperators}
+            </span>
+            <span className="badge text-bg-light border">
+              Active {activeOperators}
+            </span>
+            <span className="badge text-bg-light border">
+              Disabled {disabledOperators}
+            </span>
+            <span className="badge text-bg-light border">
+              Coverage {specializationCoverage}
+            </span>
+          </div>
+
+          {missingActiveSpecializations.length > 0 && (
+            <p className="small text-muted mb-0 mt-2">
+              No active: {missingActiveSpecializations.join(", ")}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Workload status is secondary: keep this compact and never block list usage. */}
+      {workloadLoading && (
+        <p className="small text-muted mb-2">Loading workload badges...</p>
+      )}
+      {workloadError && !workloadLoading && (
+        <p className="small text-muted mb-2">{workloadError}</p>
+      )}
+
       {/* ── Mobile card list — visible on xs/sm (below md breakpoint) ──
            Each operator gets its own card with stacked full-width buttons.
            This avoids horizontal scrolling on small screens. */}
@@ -210,64 +278,115 @@ export function OperatorListPage() {
         {operators.map((operator) => (
           <div key={operator.id} className="ro-task-card">
             <div className="card-body">
-              {/* Row 1: name + status badge */}
-              <div className="d-flex justify-content-between align-items-center mb-1">
-                <span
-                  className="fw-semibold"
-                  style={{ color: "var(--ro-text)" }}
-                >
-                  {operator.fullName}
-                </span>
-                <StatusBadge status={operator.status} type="operator" />
-              </div>
-              {/* Row 2: email */}
-              <div
-                className="mb-1"
-                style={{ fontSize: "0.875rem", color: "var(--ro-text-muted)" }}
-              >
-                {operator.email}
-              </div>
-              {/* Row 3: specialization badge */}
-              <div className="mb-3">
-                <span className="badge text-bg-light border">
-                  {operator.specializationCategory}
-                </span>
-              </div>
-              {/* Row 4: action CTAs stacked full-width */}
-              <div className="d-grid gap-2">
-                <Link
-                  to={`/admin/operators/${operator.id}/edit`}
-                  state={{ operator }}
-                  className="btn btn-outline-primary btn-sm"
-                >
-                  Edit
-                </Link>
-                <button
-                  type="button"
-                  className={`btn btn-sm ${
-                    operator.status === "ACTIVE"
-                      ? "btn-outline-danger"
-                      : "btn-outline-success"
-                  }`}
-                  onClick={() => void handleToggle(operator)}
-                  disabled={togglingId === operator.id}
-                >
-                  {togglingId === operator.id ? (
-                    <>
+              {(() => {
+                const workload = workloadByOperatorId[operator.id];
+                const hasAssigned = (workload?.assigned ?? 0) > 0;
+                const hasInProgress = (workload?.inProgress ?? 0) > 0;
+                const hasCompleted = (workload?.completed ?? 0) > 0;
+                const hasWorkload =
+                  hasAssigned || hasInProgress || hasCompleted;
+
+                return (
+                  <>
+                    {/* Row 1: name + status badge */}
+                    <div className="d-flex justify-content-between align-items-center mb-1">
                       <span
-                        className="spinner-border spinner-border-sm me-1"
-                        role="status"
-                        aria-hidden="true"
-                      />
-                      Updating...
-                    </>
-                  ) : operator.status === "ACTIVE" ? (
-                    "Disable"
-                  ) : (
-                    "Enable"
-                  )}
-                </button>
-              </div>
+                        className="fw-semibold"
+                        style={{ color: "var(--ro-text)" }}
+                      >
+                        {operator.fullName}
+                      </span>
+                      <StatusBadge status={operator.status} type="operator" />
+                    </div>
+                    {/* Row 2: email */}
+                    <div
+                      className="mb-1"
+                      style={{
+                        fontSize: "0.875rem",
+                        color: "var(--ro-text-muted)",
+                      }}
+                    >
+                      {operator.email}
+                    </div>
+                    {/* Row 3: specialization badge */}
+                    <div className="mb-3">
+                      <span className="badge text-bg-light border">
+                        {operator.specializationCategory}
+                      </span>
+                    </div>
+                    {/* Row 3.5: compact workload signals, only when at least one value is non-zero. */}
+                    {!workloadLoading && !workloadError && hasWorkload && (
+                      <div
+                        className="d-flex flex-wrap gap-1 mb-3"
+                        aria-label="Workload summary"
+                      >
+                        {hasAssigned && (
+                          <span
+                            className="badge text-bg-light border"
+                            style={{ fontSize: "0.7rem" }}
+                            title="Assigned tasks"
+                          >
+                            A {workload?.assigned ?? 0}
+                          </span>
+                        )}
+                        {hasInProgress && (
+                          <span
+                            className="badge text-bg-light border"
+                            style={{ fontSize: "0.7rem" }}
+                            title="In progress tasks"
+                          >
+                            IP {workload?.inProgress ?? 0}
+                          </span>
+                        )}
+                        {hasCompleted && (
+                          <span
+                            className="badge text-bg-light border"
+                            style={{ fontSize: "0.7rem" }}
+                            title="Completed tasks"
+                          >
+                            C {workload?.completed ?? 0}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {/* Row 4: action CTAs stacked full-width */}
+                    <div className="d-grid gap-2">
+                      <Link
+                        to={`/admin/operators/${operator.id}/edit`}
+                        state={{ operator }}
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${
+                          operator.status === "ACTIVE"
+                            ? "btn-outline-danger"
+                            : "btn-outline-success"
+                        }`}
+                        onClick={() => void handleToggle(operator)}
+                        disabled={togglingId === operator.id}
+                      >
+                        {togglingId === operator.id ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-1"
+                              role="status"
+                              aria-hidden="true"
+                            />
+                            Updating...
+                          </>
+                        ) : operator.status === "ACTIVE" ? (
+                          "Disable"
+                        ) : (
+                          "Enable"
+                        )}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         ))}
@@ -294,7 +413,56 @@ export function OperatorListPage() {
                     <td style={{ color: "var(--ro-text-muted)" }}>
                       {operator.email}
                     </td>
-                    <td>{operator.specializationCategory}</td>
+                    <td>
+                      <div>{operator.specializationCategory}</div>
+                      {!workloadLoading &&
+                        !workloadError &&
+                        (() => {
+                          const workload = workloadByOperatorId[operator.id];
+                          const hasAssigned = (workload?.assigned ?? 0) > 0;
+                          const hasInProgress = (workload?.inProgress ?? 0) > 0;
+                          const hasCompleted = (workload?.completed ?? 0) > 0;
+                          const hasWorkload =
+                            hasAssigned || hasInProgress || hasCompleted;
+
+                          if (!hasWorkload) return null;
+
+                          return (
+                            <div
+                              className="d-flex flex-wrap gap-1 mt-1"
+                              aria-label="Workload summary"
+                            >
+                              {hasAssigned && (
+                                <span
+                                  className="badge text-bg-light border"
+                                  style={{ fontSize: "0.7rem" }}
+                                  title="Assigned tasks"
+                                >
+                                  A {workload?.assigned ?? 0}
+                                </span>
+                              )}
+                              {hasInProgress && (
+                                <span
+                                  className="badge text-bg-light border"
+                                  style={{ fontSize: "0.7rem" }}
+                                  title="In progress tasks"
+                                >
+                                  IP {workload?.inProgress ?? 0}
+                                </span>
+                              )}
+                              {hasCompleted && (
+                                <span
+                                  className="badge text-bg-light border"
+                                  style={{ fontSize: "0.7rem" }}
+                                  title="Completed tasks"
+                                >
+                                  C {workload?.completed ?? 0}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
+                    </td>
                     <td>
                       <StatusBadge status={operator.status} type="operator" />
                     </td>
