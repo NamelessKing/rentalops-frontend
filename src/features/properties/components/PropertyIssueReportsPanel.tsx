@@ -29,10 +29,18 @@ interface PropertyIssueReportsPanelProps {
 // overflow hint. Kept small so the panel stays a summary.
 const PREVIEW_LIMIT = 3;
 
+// Normalises a raw ISO 8601 string before parsing.
+// Legacy backend values may omit the UTC offset, which causes Safari and some
+// older environments to treat them as local-time rather than UTC.  Appending
+// "Z" only when no offset is already present keeps both old and new data safe.
+function normalizeIso(iso: string): string {
+  return /(?:Z|[+-]\d{2}:\d{2})$/i.test(iso) ? iso : `${iso}Z`;
+}
+
 // Formats an ISO 8601 date string to a short, locale-aware date.
 // Using "short" month avoids locale-specific ordering confusion.
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(normalizeIso(iso)).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -142,7 +150,8 @@ export function PropertyIssueReportsPanel({
 
     const byDateDesc = [...data].sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        new Date(normalizeIso(b.createdAt)).getTime() -
+        new Date(normalizeIso(a.createdAt)).getTime(),
     );
 
     const openAll = byDateDesc.filter((r) => r.status === "OPEN");

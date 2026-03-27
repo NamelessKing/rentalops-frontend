@@ -39,7 +39,11 @@ export function usePropertyIssueReports(propertyId: string | undefined) {
       setData(all.filter((r) => r.propertyId === propertyId));
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
+        const status = err.response?.status;
+
+        if (status === 401) {
+          setError("Your session expired. Please sign in again.");
+        } else if (status === 403) {
           setError("You are not authorised to view issue reports.");
         } else {
           setError("Failed to load issue reports. Please try again.");
