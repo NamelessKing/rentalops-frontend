@@ -477,6 +477,21 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── Home navbar custom class ── */
+/* Same light surface as the admin nav but without any role accent.
+   Used exclusively by HomeLayout on the public "/" route. */
+.ro-home-nav {
+  background-color: var(--ro-surface) !important;
+  border-bottom: 1px solid var(--ro-border) !important;
+}
+
+.ro-home-nav .navbar-brand {
+  color: var(--ro-primary) !important;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
 /* Role chip shown next to operator name in navbar */
 .ro-role-chip {
   font-size: 0.65rem;
