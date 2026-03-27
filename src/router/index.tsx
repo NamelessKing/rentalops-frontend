@@ -3,7 +3,7 @@
 //
 // Route layout:
 //
-//   /                         → redirect to /login
+//   /                         → HomeLayout → AppHomePage (public entry point)
 //   PublicLayout
 //     /register               → public
 //     /login                  → public
@@ -35,7 +35,7 @@
 //   is checked, then nesting under <RequireRole> checks the role,
 //   and finally the layout renders with <Outlet />.
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import { OperatorLayout } from "@/layouts/OperatorLayout";
@@ -59,14 +59,20 @@ import { CreateIssueReportPage } from "@/pages/CreateIssueReportPage";
 import { IssueReportListAdminPage } from "@/pages/IssueReportListAdminPage";
 import { IssueReportDetailAdminPage } from "@/pages/IssueReportDetailAdminPage";
 import { AdminDashboardPage } from "@/pages/AdminDashboardPage";
+import { AppHomePage } from "@/pages/AppHomePage";
+import { HomeLayout } from "@/layouts/HomeLayout";
 
 export function AppRouter() {
   return (
     <Routes>
-      {/* ── Root redirect ──────────────────────────────────────────────────── */}
-      {/* Hitting / sends users to /login; post-login redirect is handled
-          by the login flow based on role (ADMIN → dashboard, OPERATOR → tasks) */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* ── App homepage ────────────────────────────────────────────────────── */}
+      {/* "/" is the public entry point of the app. HomeLayout provides the
+          thin public navbar (brand + Login / Register links). No auth guard.
+          Post-login redirects (ADMIN → /admin/dashboard, OPERATOR → /operator/tasks)
+          are handled by the login flow and are not affected by this route. */}
+      <Route element={<HomeLayout />}>
+        <Route path="/" element={<AppHomePage />} />
+      </Route>
 
       {/* ── Public area ────────────────────────────────────────────────────── */}
       {/* PublicLayout provides the centred, navbar-free shell */}
