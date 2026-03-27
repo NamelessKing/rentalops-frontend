@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# RentalOps Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+RentalOps Frontend is the client application for RentalOps, a multi-tenant B2B platform designed for short-term rental operations. It gives property managers and field operators a shared workspace to manage properties, assign work, track task execution, and report issues found on site.
 
-Currently, two official plugins are available:
+This repository contains the web interface used by two main roles:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `ADMIN`, who manages operators, properties, tasks, issue review, and the operational dashboard
+- `OPERATOR`, who claims or receives tasks, updates task progress, and creates issue reports from the field
 
-## React Compiler
+## Project Repositories
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Frontend repository: [github.com/NamelessKing/rentalops-frontend](https://github.com/NamelessKing/rentalops-frontend)
+- Backend repository: [github.com/NamelessKing/rentalops-backend](https://github.com/NamelessKing/rentalops-backend)
 
-## Expanding the ESLint configuration
+## What The Frontend Covers
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The application supports the main MVP workflow of the project:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- admin registration and login
+- role-based access for admins and operators
+- operator management inside a tenant workspace
+- property management
+- task creation with both `POOL` and `DIRECT_ASSIGNMENT` dispatch modes
+- operator task views for claimed and assigned work
+- task lifecycle updates from `PENDING` to `COMPLETED`
+- issue report creation from the operator area
+- admin review, dismissal, or conversion of issue reports into tasks
+- admin dashboard with operational summary data
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+The frontend is built to keep the admin experience clear and structured, while the operator area stays lightweight and mobile-friendly.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
+
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Axios
+- Bootstrap 5
+- Vitest and Testing Library
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+- a running RentalOps backend instance
+
+### Environment
+
+Create a local environment file:
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.local.example .env.local
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+macOS / Linux:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.local.example .env.local
 ```
+
+Default local values:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_DEV_SERVER_HOST=127.0.0.1
+VITE_DEV_SERVER_PORT=5173
+```
+
+## Run The Project
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+The app runs on `http://127.0.0.1:5173` by default.
+
+## Available Scripts
+
+- `npm run dev` starts the Vite development server
+- `npm run build` creates the production build
+- `npm run preview` previews the production build locally
+- `npm run lint` runs ESLint
+- `npm run test` runs tests in watch mode
+- `npm run test:run` runs tests once for CI or local verification
+
+## Backend Dependency
+
+This frontend does not include the API server. To run the full project locally, start the backend from the companion repository:
+
+[https://github.com/NamelessKing/rentalops-backend](https://github.com/NamelessKing/rentalops-backend)
+
+By default, the frontend expects the backend API to be available at `http://localhost:8080`.
