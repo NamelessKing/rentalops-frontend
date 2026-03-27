@@ -8,6 +8,8 @@
 import { useState, type ComponentProps } from "react";
 import { Link, useParams } from "react-router-dom";
 import { usePropertyDetail } from "@/features/properties/hooks/usePropertyDetail";
+import { PropertyTasksPanel } from "@/features/properties/components/PropertyTasksPanel";
+import { PropertyIssueReportsPanel } from "@/features/properties/components/PropertyIssueReportsPanel";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 
 interface PropertyFormDraft {
@@ -217,204 +219,225 @@ export function PropertyDetailPage() {
       {saveSuccess && <div className="alert alert-success">{saveSuccess}</div>}
       {saveError && <div className="alert alert-danger">{saveError}</div>}
 
-      {/* Status and ID bar — a compact panel shown above the form at all times. */}
-      <div className="ro-section-panel p-3 mb-3">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <span className="text-muted small me-2">Status:</span>
-            <StatusBadge
-              status={data.active ? "ACTIVE" : "INACTIVE"}
-              type="property"
-            />
-          </div>
-          <div className="small text-muted">
-            ID: <code>{data.id}</code>
-          </div>
-        </div>
-      </div>
+      {/* Two-column grid: form on the left, task overview on the right.
+          On mobile the columns stack naturally in DOM order (form first). */}
+      <div className="row g-4">
+        {/* ── Left column: property form ── */}
+        <div className="col-12 col-lg-6">
+          <div className="ro-form-card">
+            {/* Compact status + ID line inside the form card.
+                Kept as secondary info so it doesn't compete visually with the form fields. */}
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+              <div>
+                <span className="text-muted small me-2">Status:</span>
+                <StatusBadge
+                  status={data.active ? "ACTIVE" : "INACTIVE"}
+                  type="property"
+                />
+              </div>
+              <div className="small text-muted">
+                ID: <code>{data.id}</code>
+              </div>
+            </div>
+            <form onSubmit={handleSave} noValidate>
+              <div className="mb-3">
+                <label htmlFor="propertyCode" className="form-label">
+                  Property code
+                </label>
+                <input
+                  id="propertyCode"
+                  className={`form-control ${fieldErrors.propertyCode ? "is-invalid" : ""}`}
+                  value={values.propertyCode}
+                  onChange={(e) => {
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, propertyCode: e.target.value }
+                        : {
+                            propertyCode: e.target.value,
+                            name: data.name,
+                            address: data.address,
+                            city: data.city,
+                            notes: data.notes ?? "",
+                          },
+                    );
+                    if (fieldErrors.propertyCode) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        propertyCode: undefined,
+                      }));
+                    }
+                  }}
+                  disabled={!isEditing || saving}
+                  required
+                />
+                {fieldErrors.propertyCode && (
+                  <div className="invalid-feedback">
+                    {fieldErrors.propertyCode}
+                  </div>
+                )}
+              </div>
 
-      {/* ro-form-card: max-width constrained warm-surface form wrapper. */}
-      <div className="ro-form-card">
-        <form onSubmit={handleSave} noValidate>
-          <div className="mb-3">
-            <label htmlFor="propertyCode" className="form-label">
-              Property code
-            </label>
-            <input
-              id="propertyCode"
-              className={`form-control ${fieldErrors.propertyCode ? "is-invalid" : ""}`}
-              value={values.propertyCode}
-              onChange={(e) => {
-                setDraft((prev) =>
-                  prev
-                    ? { ...prev, propertyCode: e.target.value }
-                    : {
-                        propertyCode: e.target.value,
-                        name: data.name,
-                        address: data.address,
-                        city: data.city,
-                        notes: data.notes ?? "",
-                      },
-                );
-                if (fieldErrors.propertyCode) {
-                  setFieldErrors((prev) => ({
-                    ...prev,
-                    propertyCode: undefined,
-                  }));
-                }
-              }}
-              disabled={!isEditing || saving}
-              required
-            />
-            {fieldErrors.propertyCode && (
-              <div className="invalid-feedback">{fieldErrors.propertyCode}</div>
-            )}
-          </div>
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  className={`form-control ${fieldErrors.name ? "is-invalid" : ""}`}
+                  value={values.name}
+                  onChange={(e) => {
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, name: e.target.value }
+                        : {
+                            propertyCode: data.propertyCode,
+                            name: e.target.value,
+                            address: data.address,
+                            city: data.city,
+                            notes: data.notes ?? "",
+                          },
+                    );
+                    if (fieldErrors.name) {
+                      setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                    }
+                  }}
+                  disabled={!isEditing || saving}
+                  required
+                />
+                {fieldErrors.name && (
+                  <div className="invalid-feedback">{fieldErrors.name}</div>
+                )}
+              </div>
 
-          <div className="mb-3">
-            <label htmlFor="name" className="form-label">
-              Name
-            </label>
-            <input
-              id="name"
-              className={`form-control ${fieldErrors.name ? "is-invalid" : ""}`}
-              value={values.name}
-              onChange={(e) => {
-                setDraft((prev) =>
-                  prev
-                    ? { ...prev, name: e.target.value }
-                    : {
-                        propertyCode: data.propertyCode,
-                        name: e.target.value,
-                        address: data.address,
-                        city: data.city,
-                        notes: data.notes ?? "",
-                      },
-                );
-                if (fieldErrors.name) {
-                  setFieldErrors((prev) => ({ ...prev, name: undefined }));
-                }
-              }}
-              disabled={!isEditing || saving}
-              required
-            />
-            {fieldErrors.name && (
-              <div className="invalid-feedback">{fieldErrors.name}</div>
-            )}
-          </div>
+              <div className="mb-3">
+                <label htmlFor="address" className="form-label">
+                  Address
+                </label>
+                <input
+                  id="address"
+                  className={`form-control ${fieldErrors.address ? "is-invalid" : ""}`}
+                  value={values.address}
+                  onChange={(e) => {
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, address: e.target.value }
+                        : {
+                            propertyCode: data.propertyCode,
+                            name: data.name,
+                            address: e.target.value,
+                            city: data.city,
+                            notes: data.notes ?? "",
+                          },
+                    );
+                    if (fieldErrors.address) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        address: undefined,
+                      }));
+                    }
+                  }}
+                  disabled={!isEditing || saving}
+                  required
+                />
+                {fieldErrors.address && (
+                  <div className="invalid-feedback">{fieldErrors.address}</div>
+                )}
+              </div>
 
-          <div className="mb-3">
-            <label htmlFor="address" className="form-label">
-              Address
-            </label>
-            <input
-              id="address"
-              className={`form-control ${fieldErrors.address ? "is-invalid" : ""}`}
-              value={values.address}
-              onChange={(e) => {
-                setDraft((prev) =>
-                  prev
-                    ? { ...prev, address: e.target.value }
-                    : {
-                        propertyCode: data.propertyCode,
-                        name: data.name,
-                        address: e.target.value,
-                        city: data.city,
-                        notes: data.notes ?? "",
-                      },
-                );
-                if (fieldErrors.address) {
-                  setFieldErrors((prev) => ({ ...prev, address: undefined }));
-                }
-              }}
-              disabled={!isEditing || saving}
-              required
-            />
-            {fieldErrors.address && (
-              <div className="invalid-feedback">{fieldErrors.address}</div>
-            )}
-          </div>
+              <div className="mb-3">
+                <label htmlFor="city" className="form-label">
+                  City
+                </label>
+                <input
+                  id="city"
+                  className={`form-control ${fieldErrors.city ? "is-invalid" : ""}`}
+                  value={values.city}
+                  onChange={(e) => {
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, city: e.target.value }
+                        : {
+                            propertyCode: data.propertyCode,
+                            name: data.name,
+                            address: data.address,
+                            city: e.target.value,
+                            notes: data.notes ?? "",
+                          },
+                    );
+                    if (fieldErrors.city) {
+                      setFieldErrors((prev) => ({ ...prev, city: undefined }));
+                    }
+                  }}
+                  disabled={!isEditing || saving}
+                  required
+                />
+                {fieldErrors.city && (
+                  <div className="invalid-feedback">{fieldErrors.city}</div>
+                )}
+              </div>
 
-          <div className="mb-3">
-            <label htmlFor="city" className="form-label">
-              City
-            </label>
-            <input
-              id="city"
-              className={`form-control ${fieldErrors.city ? "is-invalid" : ""}`}
-              value={values.city}
-              onChange={(e) => {
-                setDraft((prev) =>
-                  prev
-                    ? { ...prev, city: e.target.value }
-                    : {
-                        propertyCode: data.propertyCode,
-                        name: data.name,
-                        address: data.address,
-                        city: e.target.value,
-                        notes: data.notes ?? "",
-                      },
-                );
-                if (fieldErrors.city) {
-                  setFieldErrors((prev) => ({ ...prev, city: undefined }));
-                }
-              }}
-              disabled={!isEditing || saving}
-              required
-            />
-            {fieldErrors.city && (
-              <div className="invalid-feedback">{fieldErrors.city}</div>
-            )}
-          </div>
+              <div className="mb-4">
+                <label htmlFor="notes" className="form-label">
+                  Notes (optional)
+                </label>
+                <textarea
+                  id="notes"
+                  className="form-control"
+                  value={values.notes}
+                  onChange={(e) =>
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, notes: e.target.value }
+                        : {
+                            propertyCode: data.propertyCode,
+                            name: data.name,
+                            address: data.address,
+                            city: data.city,
+                            notes: e.target.value,
+                          },
+                    )
+                  }
+                  rows={3}
+                  disabled={!isEditing || saving}
+                />
+              </div>
 
-          <div className="mb-4">
-            <label htmlFor="notes" className="form-label">
-              Notes (optional)
-            </label>
-            <textarea
-              id="notes"
-              className="form-control"
-              value={values.notes}
-              onChange={(e) =>
-                setDraft((prev) =>
-                  prev
-                    ? { ...prev, notes: e.target.value }
-                    : {
-                        propertyCode: data.propertyCode,
-                        name: data.name,
-                        address: data.address,
-                        city: data.city,
-                        notes: e.target.value,
-                      },
-                )
-              }
-              rows={3}
-              disabled={!isEditing || saving}
-            />
-          </div>
-
-          {isEditing && (
-            <button
-              type="submit"
-              className="btn btn-primary w-100"
-              disabled={saving}
-            >
-              {saving ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  Saving…
-                </>
-              ) : (
-                "Save"
+              {isEditing && (
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100"
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      />
+                      Saving…
+                    </>
+                  ) : (
+                    "Save"
+                  )}
+                </button>
               )}
-            </button>
-          )}
-        </form>
+            </form>
+          </div>
+          {/* end ro-form-card */}
+        </div>
+        {/* end left col */}
+
+        {/* ── Right column: task overview + issue reports ── */}
+        <div className="col-12 col-lg-6">
+          <PropertyTasksPanel propertyId={data.id} />
+          {/* Issue reports panel sits below the task overview in the same column.
+              On mobile both panels stack naturally after the form. */}
+          <PropertyIssueReportsPanel propertyId={data.id} />
+        </div>
+        {/* end right col */}
       </div>
+      {/* end row g-4 */}
     </section>
   );
 }
